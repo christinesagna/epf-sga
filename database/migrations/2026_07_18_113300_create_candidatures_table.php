@@ -13,6 +13,15 @@ return new class extends Migration
             $table->id();
             $table->foreignId('candidat_id')->constrained()->cascadeOnDelete();
             $table->foreignId('programme_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('programme_origine_id')
+                ->nullable()
+                ->constrained('programmes')
+                ->restrictOnDelete();
+            $table->foreignId('agent_admission_id')
+                ->nullable()
+                ->constrained('users')
+                ->restrictOnDelete();
+            $table->timestamp('pris_en_charge_at')->nullable();
 
             $table->uuid('edit_token')->unique();
             $table->string('code_suivi')->nullable()->unique();

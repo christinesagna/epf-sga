@@ -12,6 +12,9 @@ class Candidature extends Model
     protected $fillable = [
         'candidat_id',
         'programme_id',
+        'programme_origine_id',
+        'agent_admission_id',
+        'pris_en_charge_at',
         'edit_token',
         'code_suivi',
         'statut',
@@ -25,6 +28,7 @@ class Candidature extends Model
 
     protected $casts = [
         'statut' => CandidatureStatut::class,
+        'pris_en_charge_at' => 'datetime',
         'submitted_at' => 'datetime',
         'locked_identity_at' => 'datetime',
     ];
@@ -37,6 +41,16 @@ class Candidature extends Model
     public function programme(): BelongsTo
     {
         return $this->belongsTo(Programme::class);
+    }
+
+    public function programmeOrigine(): BelongsTo
+    {
+        return $this->belongsTo(Programme::class, 'programme_origine_id');
+    }
+
+    public function agentAdmission(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'agent_admission_id');
     }
 
     public function documents(): HasMany
@@ -58,8 +72,18 @@ class Candidature extends Model
     {
         return in_array($this->statut, [
             CandidatureStatut::BROUILLON,
-            CandidatureStatut::SOUMISE,
-            CandidatureStatut::COMPLEMENT_DEMANDE,
+            CandidatureStatut::COMPLEMENT_ADMISSION,
+            CandidatureStatut::COMPLEMENT_JURY,
         ], true);
+    }
+
+    public function peutTransitionnerVers(CandidatureStatut $nouveauStatut): bool
+    {
+        return $this->statut->peutTransitionnerVers($nouveauStatut);
+    }
+
+    public function peutEtreReorientee(): bool
+    {
+        return $this->statut === CandidatureStatut::TRANSMISE_AU_JURY;
     }
 }
