@@ -95,21 +95,24 @@ class ProgrammesSeeder extends Seeder
                     'description' => $programme['description'],
                     'actif' => true,
                     'created_at' => $now,
-
-            DB::table('programmes')
-                ->whereIn('nom', [
-                    'Master 1 Informatique',
-                    'Master 2 Informatique',
-                    'Master 1 Énergie',
-                    'Master 2 Énergie',
-                ])
-                ->update([
-                    'actif' => false,
->
                     'updated_at' => $now,
-                ]);
+                ]
+            );
+        }
 
-            $niveauxLicence = [
+        DB::table('programmes')
+            ->whereIn('nom', [
+                'Master 1 Informatique',
+                'Master 2 Informatique',
+                'Master 1 Énergie',
+                'Master 2 Énergie',
+            ])
+            ->update([
+                'actif' => false,
+                'updated_at' => $now,
+            ]);
+
+        $niveauxLicence = [
                 [
                     'code' => 'licence_1',
                     'libelle' => 'Licence 1',
