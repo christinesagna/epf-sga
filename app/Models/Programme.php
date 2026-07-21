@@ -21,6 +21,11 @@ class Programme extends Model
         'actif',
     ];
 
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
+
     protected $casts = [
         'date_ouverture' => 'date',
         'date_fermeture' => 'date',
