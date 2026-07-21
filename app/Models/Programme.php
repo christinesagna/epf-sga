@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Programme extends Model
@@ -33,12 +32,10 @@ class Programme extends Model
         'frais_scolarite' => 'decimal:2',
     ];
 
-    public function typesDocuments(): BelongsToMany
+    public function niveaux(): HasMany
     {
-        return $this->belongsToMany(TypeDocument::class, 'programme_type_document')
-            ->withPivot(['obligatoire', 'ordre'])
-            ->withTimestamps()
-            ->orderBy('programme_type_document.ordre');
+        return $this->hasMany(ProgrammeNiveau::class)
+            ->orderBy('ordre');
     }
 
     public function candidatures(): HasMany

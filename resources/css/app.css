@@ -1,8 +1,27 @@
-/* Tailwind entry point */
-@import "tailwindcss";
-
 /* Small helpers to ensure icons keep expected sizes when Tailwind is active */
 svg[class*="w-"] { height: auto; }
 
 /* Hero image constraint (matches welcome view helper class) */
 .hero-image { max-width: 520px; width: 100%; height: auto; }
+
+@import 'tailwindcss';
+@plugin '@tailwindcss/forms';
+
+@source '../views/**/*.blade.php';
+@source '../js/**/*.js';
+@source '../../storage/framework/views/*.php';
+
+@theme {
+    --color-epf-purple: #260052;
+    --color-epf-purple-dark: #170035;
+    --color-epf-red: #e3062f;
+    --color-epf-red-dark: #b90428;
+    --color-epf-lavender: #f6f3fb;
+    --color-epf-muted: #706784;
+    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
+}
+
+[x-cloak] {
+    display: none !important;
+}
+

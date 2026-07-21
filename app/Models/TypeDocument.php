@@ -24,9 +24,9 @@ class TypeDocument extends Model
         'actif' => 'boolean',
     ];
 
-    public function programmes(): BelongsToMany
+    public function niveauxProgrammes(): BelongsToMany
     {
-        return $this->belongsToMany(Programme::class, 'programme_type_document')
+        return $this->belongsToMany(ProgrammeNiveau::class, 'programme_niveau_type_document')
             ->withPivot(['obligatoire', 'ordre'])
             ->withTimestamps();
     }
