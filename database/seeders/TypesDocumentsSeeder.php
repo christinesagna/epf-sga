@@ -24,13 +24,38 @@ class TypesDocumentsSeeder extends Seeder
             ],
             [
                 'code' => 'releve_notes',
-                'libelle' => 'Relevés de notes',
-                'description' => 'Relevés selon le niveau visé',
+                'libelle' => 'Relevé de notes Bac',
+                'description' => 'Relevé des résultats du Baccalauréat',
+            ],
+            [
+                'code' => 'releve_notes_terminale',
+                'libelle' => 'Relevé de notes Terminale',
+                'description' => 'Relevé de notes de la classe de Terminale',
+            ],
+            [
+                'code' => 'releve_notes_licence_1',
+                'libelle' => 'Relevé de notes Licence 1',
+                'description' => 'Relevé de notes de la première année de Licence',
+            ],
+            [
+                'code' => 'releve_notes_licence_2',
+                'libelle' => 'Relevé de notes Licence 2',
+                'description' => 'Relevé de notes de la deuxième année de Licence',
+            ],
+            [
+                'code' => 'releve_notes_licence_3',
+                'libelle' => 'Relevé de notes Licence 3',
+                'description' => 'Relevé de notes de la troisième année de Licence',
+            ],
+            [
+                'code' => 'releve_notes_master',
+                'libelle' => 'Relevé de notes Master',
+                'description' => 'Relevé de notes de la première année de Master',
             ],
             [
                 'code' => 'diplome',
-                'libelle' => 'Diplôme',
-                'description' => 'Diplôme ou attestation',
+                'libelle' => 'Diplôme Bac',
+                'description' => 'Diplôme ou attestation de réussite au Baccalauréat',
             ],
             [
                 'code' => 'lettre_motivation',
@@ -40,7 +65,7 @@ class TypesDocumentsSeeder extends Seeder
             [
                 'code' => 'lettre_recommandation',
                 'libelle' => 'Lettre de recommandation',
-                'description' => 'Demandée pour certains programmes',
+                'description' => 'Demandée pour les programmes de Master',
             ],
         ];
 
