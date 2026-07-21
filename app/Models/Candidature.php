@@ -12,6 +12,7 @@ class Candidature extends Model
     protected $fillable = [
         'candidat_id',
         'programme_id',
+        'programme_niveau_id',
         'programme_origine_id',
         'agent_admission_id',
         'pris_en_charge_at',
@@ -41,6 +42,11 @@ class Candidature extends Model
     public function programme(): BelongsTo
     {
         return $this->belongsTo(Programme::class);
+    }
+
+    public function programmeNiveau(): BelongsTo
+    {
+        return $this->belongsTo(ProgrammeNiveau::class);
     }
 
     public function programmeOrigine(): BelongsTo
