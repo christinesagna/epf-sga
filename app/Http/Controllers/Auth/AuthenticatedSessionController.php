@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Enums\RoleUtilisateur;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use Illuminate\Http\RedirectResponse;
@@ -28,7 +29,11 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('back-office.dashboard', absolute: false));
+        $dashboard = $request->user()->role === RoleUtilisateur::SUPER_ADMIN
+            ? 'administration.dashboard'
+            : 'back-office.dashboard';
+
+        return redirect()->intended(route($dashboard, absolute: false));
     }
 
     /**
