@@ -9,6 +9,7 @@ use Database\Seeders\ProgrammesSeeder;
 use Database\Seeders\TypesDocumentsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
 class ProgrammeDocumentsSeederTest extends TestCase
@@ -20,6 +21,16 @@ class ProgrammeDocumentsSeederTest extends TestCase
         $this->seed(TypesDocumentsSeeder::class);
         $this->seed(NiveauxSeeder::class);
         $this->seed(ProgrammesSeeder::class);
+
+        $this->assertTrue(Schema::hasTable('niveaux'));
+        $this->assertTrue(Schema::hasColumns('programme_niveaux', [
+            'programme_id',
+            'niveau_id',
+            'ordre',
+            'actif',
+        ]));
+        $this->assertFalse(Schema::hasColumn('programme_niveaux', 'code'));
+        $this->assertFalse(Schema::hasColumn('programme_niveaux', 'libelle'));
 
         $this->assertDatabaseCount('types_documents', 11);
         $this->assertDatabaseCount('niveaux', 7);
