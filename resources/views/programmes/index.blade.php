@@ -164,18 +164,7 @@
     }
 </style>
 
-<nav class="navbar">
-    <div class="navbar-inner">
-        <a href="{{ url('/') }}" class="logo-link">
-            <img src="{{ asset('logo.jpg') }}" alt="Logo EPF SGA" />
-            <span>EPF Africa</span>
-        </a>
-        <div class="nav-actions">
-            <a href="{{ url('/') }}" class="header-link">Accueil</a>
-            <a href="{{ route('programmes.index') }}" class="header-link">Programmes</a>
-        </div>
-    </div>
-</nav>
+{{-- Navbar moved to global layout --}}
 
 <div class="page-section">
     <div class="page-intro">

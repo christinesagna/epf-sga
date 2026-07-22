@@ -17,7 +17,6 @@ class Candidature extends Model
         'agent_admission_id',
         'pris_en_charge_at',
         'edit_token',
-        'code_suivi',
         'statut',
         'etape_courante',
         'derniere_formation',

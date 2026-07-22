@@ -1,4 +1,6 @@
 /** @type {import('tailwindcss').Config} */
+import forms from '@tailwindcss/forms';
+
 export default {
   content: [
     './resources/**/*.blade.php',
@@ -9,5 +11,5 @@ export default {
   theme: {
     extend: {},
   },
-  plugins: [],
+  plugins: [forms],
 };
