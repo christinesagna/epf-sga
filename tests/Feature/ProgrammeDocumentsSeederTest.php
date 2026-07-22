@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Candidature;
 use App\Models\Programme;
+use Database\Seeders\NiveauxSeeder;
 use Database\Seeders\ProgrammesSeeder;
 use Database\Seeders\TypesDocumentsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -17,12 +18,16 @@ class ProgrammeDocumentsSeederTest extends TestCase
     public function test_un_programme_expose_ses_niveaux_et_leurs_documents(): void
     {
         $this->seed(TypesDocumentsSeeder::class);
+        $this->seed(NiveauxSeeder::class);
         $this->seed(ProgrammesSeeder::class);
 
         $this->assertDatabaseCount('types_documents', 11);
+        $this->assertDatabaseCount('niveaux', 7);
         $this->assertDatabaseCount('programmes', 7);
         $this->assertDatabaseCount('programme_niveaux', 15);
         $this->assertDatabaseCount('programme_niveau_type_document', 86);
+        $this->assertSame(1, DB::table('niveaux')->where('code', 'licence_1')->count());
+        $this->assertSame(1, DB::table('niveaux')->where('code', 'master_1')->count());
 
         $documentsPostBac = [
             'cni_passeport',
@@ -86,7 +91,7 @@ class ProgrammeDocumentsSeederTest extends TestCase
             ->with([
                 'niveaux' => fn ($query) => $query
                     ->where('actif', true)
-                    ->with('typesDocuments'),
+                    ->with(['niveau', 'typesDocuments']),
             ])
             ->get()
             ->keyBy('nom');
@@ -97,20 +102,21 @@ class ProgrammeDocumentsSeederTest extends TestCase
             $programme = $programmes->get($nomProgramme);
 
             $this->assertNotNull($programme, "Le programme {$nomProgramme} est introuvable.");
-            $this->assertSame(array_keys($niveauxAttendus), $programme->niveaux->pluck('code')->all());
+            $this->assertSame(array_keys($niveauxAttendus), $programme->niveaux->pluck('niveau.code')->all());
 
             foreach ($niveauxAttendus as $codeNiveau => $codesDocuments) {
-                $niveau = $programme->niveaux->firstWhere('code', $codeNiveau);
+                $programmeNiveau = $programme->niveaux
+                    ->first(fn ($association) => $association->niveau->code === $codeNiveau);
 
-                $this->assertNotNull($niveau, "Le niveau {$codeNiveau} est introuvable.");
-                $this->assertSame($codesDocuments, $niveau->typesDocuments->pluck('code')->all());
+                $this->assertNotNull($programmeNiveau, "Le niveau {$codeNiveau} est introuvable.");
+                $this->assertSame($codesDocuments, $programmeNiveau->typesDocuments->pluck('code')->all());
                 $this->assertTrue(
-                    $niveau->typesDocuments
+                    $programmeNiveau->typesDocuments
                         ->every(fn ($document): bool => (bool) $document->pivot->obligatoire),
                 );
 
                 if (! str_starts_with($codeNiveau, 'master_')) {
-                    $this->assertNotContains('cv', $niveau->typesDocuments->pluck('code')->all());
+                    $this->assertNotContains('cv', $programmeNiveau->typesDocuments->pluck('code')->all());
                 }
             }
         }
@@ -121,7 +127,8 @@ class ProgrammeDocumentsSeederTest extends TestCase
             'updated_at' => now(),
         ]);
         $programmeMaster = $programmes->get('Master Informatique');
-        $niveauMaster2 = $programmeMaster->niveaux->firstWhere('code', 'master_2');
+        $niveauMaster2 = $programmeMaster->niveaux
+            ->first(fn ($association) => $association->niveau->code === 'master_2');
 
         $candidature = Candidature::query()->create([
             'candidat_id' => $candidatId,
@@ -141,6 +148,7 @@ class ProgrammeDocumentsSeederTest extends TestCase
     public function test_les_seeders_sont_idempotents_et_desactivent_les_masters_segmentes(): void
     {
         $this->seed(TypesDocumentsSeeder::class);
+        $this->seed(NiveauxSeeder::class);
 
         $maintenant = now();
         $mastersSegmentes = [];
@@ -159,10 +167,16 @@ class ProgrammeDocumentsSeederTest extends TestCase
 
         $this->seed(ProgrammesSeeder::class);
 
+        $associationIds = DB::table('programme_niveau_type_document')
+            ->orderBy('id')
+            ->pluck('id')
+            ->all();
+
         $niveauLicence1 = DB::table('programme_niveaux')
             ->join('programmes', 'programmes.id', '=', 'programme_niveaux.programme_id')
+            ->join('niveaux', 'niveaux.id', '=', 'programme_niveaux.niveau_id')
             ->where('programmes.nom', 'Licence Energie et environnement')
-            ->where('programme_niveaux.code', 'licence_1')
+            ->where('niveaux.code', 'licence_1')
             ->value('programme_niveaux.id');
         $cvId = DB::table('types_documents')->where('code', 'cv')->value('id');
 
@@ -176,6 +190,7 @@ class ProgrammeDocumentsSeederTest extends TestCase
         ]);
 
         $this->seed(TypesDocumentsSeeder::class);
+        $this->seed(NiveauxSeeder::class);
         $this->seed(ProgrammesSeeder::class);
 
         foreach ($mastersSegmentes as $nom => $id) {
@@ -187,9 +202,14 @@ class ProgrammeDocumentsSeederTest extends TestCase
         }
 
         $this->assertDatabaseCount('types_documents', 11);
+        $this->assertDatabaseCount('niveaux', 7);
         $this->assertDatabaseCount('programmes', 11);
         $this->assertDatabaseCount('programme_niveaux', 15);
         $this->assertDatabaseCount('programme_niveau_type_document', 86);
+        $this->assertSame(
+            $associationIds,
+            DB::table('programme_niveau_type_document')->orderBy('id')->pluck('id')->all(),
+        );
         $this->assertSame(7, Programme::query()->where('actif', true)->count());
         $this->assertDatabaseMissing('programme_niveau_type_document', [
             'programme_niveau_id' => $niveauLicence1,
@@ -200,6 +220,7 @@ class ProgrammeDocumentsSeederTest extends TestCase
     public function test_la_vue_presente_les_associations_avec_des_libelles_explicites(): void
     {
         $this->seed(TypesDocumentsSeeder::class);
+        $this->seed(NiveauxSeeder::class);
         $this->seed(ProgrammesSeeder::class);
 
         $documentsMaster2 = DB::table('vue_programme_niveau_documents')
@@ -226,6 +247,28 @@ class ProgrammeDocumentsSeederTest extends TestCase
         $this->assertTrue(
             $documentsMaster2->every(fn ($document): bool => (bool) $document->obligatoire),
         );
+    }
+
+    public function test_la_vue_programme_niveaux_presente_le_catalogue_sans_dupliquer_les_niveaux(): void
+    {
+        $this->seed(TypesDocumentsSeeder::class);
+        $this->seed(NiveauxSeeder::class);
+        $this->seed(ProgrammesSeeder::class);
+
+        $niveauxLicence = DB::table('vue_programme_niveaux')
+            ->where('programme_nom', 'Licence Concepteur de systemes d information')
+            ->orderBy('ordre')
+            ->get();
+
+        $this->assertSame(
+            ['licence_1', 'licence_2', 'licence_3'],
+            $niveauxLicence->pluck('niveau_code')->all(),
+        );
+        $this->assertSame(
+            ['Licence 1', 'Licence 2', 'Licence 3'],
+            $niveauxLicence->pluck('niveau_libelle')->all(),
+        );
+        $this->assertTrue($niveauxLicence->every(fn ($niveau): bool => (bool) $niveau->actif));
     }
 
     /**

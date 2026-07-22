@@ -10,6 +10,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             TypesDocumentsSeeder::class,
+            NiveauxSeeder::class,
             ProgrammesSeeder::class,
             SuperAdministrateurSeeder::class,
         ]);

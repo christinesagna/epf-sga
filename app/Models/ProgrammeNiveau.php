@@ -11,8 +11,7 @@ class ProgrammeNiveau extends Model
 {
     protected $fillable = [
         'programme_id',
-        'code',
-        'libelle',
+        'niveau_id',
         'ordre',
         'actif',
     ];
@@ -24,6 +23,11 @@ class ProgrammeNiveau extends Model
     public function programme(): BelongsTo
     {
         return $this->belongsTo(Programme::class);
+    }
+
+    public function niveau(): BelongsTo
+    {
+        return $this->belongsTo(Niveau::class);
     }
 
     public function typesDocuments(): BelongsToMany
