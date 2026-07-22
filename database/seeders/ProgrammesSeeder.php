@@ -29,17 +29,14 @@ class ProgrammesSeeder extends Seeder
             $niveauxLicence = [
                 [
                     'code' => 'licence_1',
-                    'libelle' => 'Licence 1',
                     'documents' => ['cni_passeport', 'diplome', 'releve_notes', 'releve_notes_terminale', 'lettre_motivation'],
                 ],
                 [
                     'code' => 'licence_2',
-                    'libelle' => 'Licence 2',
                     'documents' => ['cni_passeport', 'diplome', 'releve_notes_licence_1', 'lettre_motivation'],
                 ],
                 [
                     'code' => 'licence_3',
-                    'libelle' => 'Licence 3',
                     'documents' => ['cni_passeport', 'diplome', 'releve_notes_licence_1', 'releve_notes_licence_2', 'lettre_motivation'],
                 ],
             ];
@@ -47,12 +44,10 @@ class ProgrammesSeeder extends Seeder
             $niveauxMaster = [
                 [
                     'code' => 'master_1',
-                    'libelle' => 'Master 1',
                     'documents' => ['cni_passeport', 'diplome', 'releve_notes_licence_1', 'releve_notes_licence_2', 'releve_notes_licence_3', 'cv', 'lettre_motivation', 'lettre_recommandation'],
                 ],
                 [
                     'code' => 'master_2',
-                    'libelle' => 'Master 2',
                     'documents' => ['cni_passeport', 'diplome', 'releve_notes_licence_1', 'releve_notes_licence_2', 'releve_notes_licence_3', 'releve_notes_master', 'cv', 'lettre_motivation', 'lettre_recommandation'],
                 ],
             ];
@@ -66,7 +61,6 @@ class ProgrammesSeeder extends Seeder
                     'niveaux' => [
                         [
                             'code' => 'classe_preparatoire',
-                            'libelle' => 'Classes préparatoires',
                             'documents' => ['cni_passeport', 'diplome', 'releve_notes', 'releve_notes_terminale', 'lettre_motivation'],
                         ],
                     ],
@@ -100,7 +94,6 @@ class ProgrammesSeeder extends Seeder
                     'niveaux' => [
                         [
                             'code' => 'cycle_ingenieur',
-                            'libelle' => 'Cycle d’ingénieur',
                             'documents' => ['cni_passeport', 'diplome', 'releve_notes_licence_1', 'releve_notes_licence_2', 'lettre_motivation'],
                         ],
                     ],
@@ -143,23 +136,34 @@ class ProgrammesSeeder extends Seeder
                     ->where('nom', $programme['nom'])
                     ->value('id');
                 $codesNiveaux = collect($programme['niveaux'])->pluck('code')->all();
+                $niveauIds = DB::table('niveaux')
+                    ->whereIn('code', $codesNiveaux)
+                    ->pluck('id', 'code');
+                $missingNiveauCodes = array_diff($codesNiveaux, $niveauIds->keys()->all());
+
+                if ($missingNiveauCodes !== []) {
+                    throw new RuntimeException(
+                        'Niveaux introuvables : '.implode(', ', $missingNiveauCodes),
+                    );
+                }
 
                 DB::table('programme_niveaux')
                     ->where('programme_id', $programmeId)
-                    ->whereNotIn('code', $codesNiveaux)
+                    ->whereNotIn('niveau_id', $niveauIds->values()->all())
                     ->update([
                         'actif' => false,
                         'updated_at' => $now,
                     ]);
 
                 foreach ($programme['niveaux'] as $ordreNiveau => $niveau) {
+                    $niveauId = $niveauIds[$niveau['code']];
+
                     DB::table('programme_niveaux')->updateOrInsert(
                         [
                             'programme_id' => $programmeId,
-                            'code' => $niveau['code'],
+                            'niveau_id' => $niveauId,
                         ],
                         [
-                            'libelle' => $niveau['libelle'],
                             'ordre' => $ordreNiveau + 1,
                             'actif' => true,
                             'created_at' => $now,
@@ -169,7 +173,7 @@ class ProgrammesSeeder extends Seeder
 
                     $programmeNiveauId = DB::table('programme_niveaux')
                         ->where('programme_id', $programmeId)
-                        ->where('code', $niveau['code'])
+                        ->where('niveau_id', $niveauId)
                         ->value('id');
                     $typeDocumentIds = DB::table('types_documents')
                         ->whereIn('code', $niveau['documents'])
@@ -181,10 +185,6 @@ class ProgrammesSeeder extends Seeder
                             'Types de documents introuvables : '.implode(', ', $missingDocumentCodes),
                         );
                     }
-
-                    DB::table('programme_niveau_type_document')
-                        ->where('programme_niveau_id', $programmeNiveauId)
-                        ->delete();
 
                     $associations = [];
 
@@ -199,7 +199,25 @@ class ProgrammesSeeder extends Seeder
                         ];
                     }
 
-                    DB::table('programme_niveau_type_document')->insert($associations);
+                    DB::table('programme_niveau_type_document')
+                        ->where('programme_niveau_id', $programmeNiveauId)
+                        ->whereNotIn('type_document_id', $typeDocumentIds->values()->all())
+                        ->delete();
+
+                    foreach ($associations as $association) {
+                        DB::table('programme_niveau_type_document')->updateOrInsert(
+                            [
+                                'programme_niveau_id' => $association['programme_niveau_id'],
+                                'type_document_id' => $association['type_document_id'],
+                            ],
+                            [
+                                'obligatoire' => $association['obligatoire'],
+                                'ordre' => $association['ordre'],
+                                'created_at' => $association['created_at'],
+                                'updated_at' => $association['updated_at'],
+                            ],
+                        );
+                    }
                 }
             }
         });
