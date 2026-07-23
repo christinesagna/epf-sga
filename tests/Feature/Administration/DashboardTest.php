@@ -128,4 +128,24 @@ class DashboardTest extends TestCase
             'password' => 'password',
         ])->assertRedirect(route('back-office.dashboard', absolute: false));
     }
+
+    public function test_un_super_administrateur_est_toujours_dirige_vers_le_dashboard_administratif(): void
+    {
+        $admin = User::factory()->superAdmin()->create();
+
+        $this->get('/back-office')
+            ->assertRedirect(route('login'));
+
+        $this->post('/back-office/connexion', [
+            'email' => $admin->email,
+            'password' => 'password',
+        ])->assertRedirect(route('administration.dashboard', absolute: false));
+
+        $this->get('/back-office')
+            ->assertRedirect(route('administration.dashboard'));
+
+        $this->get('/back-office/administration')
+            ->assertOk()
+            ->assertSee('Indicateurs du back-office');
+    }
 }

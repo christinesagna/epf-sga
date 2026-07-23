@@ -33,11 +33,13 @@ class AuthenticatedSessionController extends Controller
             'last_login_at' => now(),
         ])->save();
 
-        $dashboard = $request->user()->role === RoleUtilisateur::SUPER_ADMIN
-            ? 'administration.dashboard'
-            : 'back-office.dashboard';
+        if ($request->user()->role === RoleUtilisateur::SUPER_ADMIN) {
+            $request->session()->forget('url.intended');
 
-        return redirect()->intended(route($dashboard, absolute: false));
+            return redirect()->route('administration.dashboard');
+        }
+
+        return redirect()->intended(route('back-office.dashboard', absolute: false));
     }
 
     /**
