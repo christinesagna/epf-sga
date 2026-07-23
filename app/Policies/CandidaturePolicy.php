@@ -27,6 +27,21 @@ class CandidaturePolicy
             && $candidature->statut !== CandidatureStatut::BROUILLON;
     }
 
+    public function viewAnyJury(User $user): bool
+    {
+        return $user->role === RoleUtilisateur::JURY;
+    }
+
+    public function viewJury(User $user, Candidature $candidature): bool
+    {
+        return $this->viewAnyJury($user)
+            && in_array(
+                $candidature->statut,
+                CandidatureStatut::visiblesParJury(),
+                true,
+            );
+    }
+
     public function prendreEnCharge(User $user, Candidature $candidature): bool
     {
         return $user->role === RoleUtilisateur::ADMISSION

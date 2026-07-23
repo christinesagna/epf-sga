@@ -45,6 +45,12 @@ class AuthenticatedSessionController extends Controller
             return redirect()->route('admission.dashboard');
         }
 
+        if ($request->user()->role === RoleUtilisateur::JURY) {
+            $request->session()->forget('url.intended');
+
+            return redirect()->route('jury.dashboard');
+        }
+
         return redirect()->intended(route('back-office.dashboard', absolute: false));
     }
 

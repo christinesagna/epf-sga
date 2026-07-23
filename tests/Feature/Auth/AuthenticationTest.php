@@ -47,6 +47,19 @@ class AuthenticationTest extends TestCase
             ->assertSee(RoleUtilisateur::ADMISSION->libelle());
     }
 
+    public function test_un_membre_du_jury_est_redirige_vers_son_espace(): void
+    {
+        $jury = User::factory()->jury()->create();
+
+        $this->post('/back-office/connexion', [
+            'email' => $jury->email,
+            'password' => 'password',
+        ])->assertRedirect(route('jury.dashboard', absolute: false));
+
+        $this->get('/back-office')
+            ->assertRedirect(route('jury.dashboard'));
+    }
+
     public function test_invalid_credentials_and_inactive_accounts_use_the_same_error(): void
     {
         $user = User::factory()->create();
