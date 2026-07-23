@@ -5,11 +5,14 @@ namespace Tests\Feature\Administration;
 use App\Enums\RoleUtilisateur;
 use App\Models\User;
 use App\Notifications\InvitationUtilisateur;
+use Illuminate\Contracts\Notifications\Dispatcher;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Password;
+use Mockery\MockInterface;
+use RuntimeException;
 use Tests\TestCase;
 
 class GestionUtilisateursTest extends TestCase
@@ -94,6 +97,36 @@ class GestionUtilisateursTest extends TestCase
             ->assertOk()
             ->assertSee('Alice Jury')
             ->assertDontSee('Benoît Admission');
+    }
+
+    public function test_un_echec_d_envoi_ne_conserve_pas_un_compte_incomplet(): void
+    {
+        $administrateur = User::factory()->superAdmin()->create();
+
+        $this->mock(Dispatcher::class, function (MockInterface $mock): void {
+            $mock->shouldReceive('send')
+                ->once()
+                ->andThrow(new RuntimeException('Serveur SMTP indisponible.'));
+        });
+
+        $this->actingAs($administrateur)
+            ->from(route('administration.utilisateurs.index'))
+            ->post(route('administration.utilisateurs.store'), [
+                'name' => 'Invitation impossible',
+                'email' => 'smtp.indisponible@epf.example',
+                'role' => RoleUtilisateur::JURY->value,
+            ])
+            ->assertSessionHasErrors('email');
+
+        $this->assertDatabaseMissing('users', [
+            'email' => 'smtp.indisponible@epf.example',
+        ]);
+        $this->assertDatabaseMissing('password_reset_tokens', [
+            'email' => 'smtp.indisponible@epf.example',
+        ]);
+        $this->assertDatabaseMissing('actions_administratives', [
+            'action' => 'utilisateur_invite',
+        ]);
     }
 
     public function test_le_role_est_modifie_et_la_desactivation_revoque_les_sessions(): void

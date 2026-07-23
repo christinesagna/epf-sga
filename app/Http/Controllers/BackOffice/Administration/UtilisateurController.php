@@ -14,6 +14,7 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+use Throwable;
 
 class UtilisateurController extends Controller
 {
@@ -72,8 +73,18 @@ class UtilisateurController extends Controller
             'password' => Str::random(64),
         ]);
 
-        $token = Password::broker()->createToken($utilisateur);
-        $utilisateur->notify(new InvitationUtilisateur($token));
+        try {
+            $this->envoyerInvitation($utilisateur);
+        } catch (Throwable $exception) {
+            Password::broker()->deleteToken($utilisateur);
+            $utilisateur->delete();
+
+            report($exception);
+
+            throw ValidationException::withMessages([
+                'email' => 'Le compte n’a pas été créé car l’invitation n’a pas pu être envoyée. Vérifiez la configuration email puis réessayez.',
+            ]);
+        }
 
         $utilisateur->forceFill([
             'invitation_sent_at' => now(),
@@ -105,8 +116,17 @@ class UtilisateurController extends Controller
         }
 
         $ancienneDate = $utilisateur->invitation_sent_at?->toIso8601String();
-        $token = Password::broker()->createToken($utilisateur);
-        $utilisateur->notify(new InvitationUtilisateur($token));
+        try {
+            $this->envoyerInvitation($utilisateur);
+        } catch (Throwable $exception) {
+            Password::broker()->deleteToken($utilisateur);
+
+            report($exception);
+
+            throw ValidationException::withMessages([
+                'invitation' => 'La nouvelle invitation n’a pas pu être envoyée. Vérifiez la configuration email puis réessayez.',
+            ]);
+        }
 
         $utilisateur->forceFill([
             'invitation_sent_at' => now(),
@@ -222,6 +242,13 @@ class UtilisateurController extends Controller
             ->where('role', RoleUtilisateur::SUPER_ADMIN->value)
             ->where('actif', true)
             ->count();
+    }
+
+    private function envoyerInvitation(User $utilisateur): void
+    {
+        $token = Password::broker()->createToken($utilisateur);
+
+        $utilisateur->notify(new InvitationUtilisateur($token));
     }
 
     /**
