@@ -7,6 +7,52 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
+## Invitations par email avec Gmail
+
+Le super-administrateur peut inviter un utilisateur interne depuis le back-office.
+L'utilisateur reçoit un lien valable 60 minutes pour définir son premier mot de
+passe, vérifier son adresse email et activer son compte.
+
+### Préparer le compte Gmail
+
+1. Activer la validation en deux étapes sur le compte Google utilisé pour l'envoi.
+2. Créer un mot de passe d'application dédié à EPF SGA.
+3. Ne jamais ajouter ce mot de passe dans Git ou dans `.env.example`.
+
+L'option des mots de passe d'application peut être désactivée par
+l'administrateur d'un compte professionnel ou scolaire.
+
+### Configurer le fichier `.env`
+
+```dotenv
+APP_URL=http://127.0.0.1:8000
+
+MAIL_MAILER=smtp
+MAIL_SCHEME=smtp
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME="adresse-gmail-utilisee-pour-envoyer"
+MAIL_PASSWORD="mot-de-passe-application-google"
+MAIL_FROM_ADDRESS="${MAIL_USERNAME}"
+MAIL_FROM_NAME="EPF Africa"
+```
+
+`APP_URL` détermine le domaine présent dans le lien d'invitation. En
+développement, le lien n'est accessible que depuis l'ordinateur qui exécute
+Laravel. En production, cette valeur doit être remplacée par l'adresse publique
+de l'application.
+
+Après une modification du `.env`, vider le cache de configuration :
+
+```bash
+php artisan config:clear
+```
+
+L'envoi peut ensuite être testé en invitant une adresse contrôlée depuis
+`/back-office/administration/utilisateurs`. Le mot de passe d'application ne
+doit jamais être communiqué dans une issue, une Pull Request ou une capture
+d'écran.
+
 ## About Laravel
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:

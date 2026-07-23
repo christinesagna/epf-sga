@@ -5,6 +5,8 @@ namespace App\Notifications;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Symfony\Component\Mime\Email;
+use Symfony\Component\Mime\Part\DataPart;
 
 class InvitationUtilisateur extends Notification
 {
@@ -34,11 +36,28 @@ class InvitationUtilisateur extends Notification
 
         return (new MailMessage)
             ->subject('Invitation au back-office EPF Africa')
-            ->greeting("Bonjour {$notifiable->name},")
-            ->line('Un accès au back-office EPF Africa vient de vous être créé.')
-            ->line('Utilisez ce lien dans les 60 minutes pour définir votre mot de passe et activer votre compte.')
-            ->action('Définir mon mot de passe', $url)
-            ->line('Si vous n’attendiez pas cette invitation, vous pouvez ignorer ce message.');
+            ->view([
+                'html' => 'mail.invitations.utilisateur',
+                'text' => 'mail.invitations.utilisateur-text',
+            ], [
+                'nom' => $notifiable->name,
+                'email' => $notifiable->getEmailForPasswordReset(),
+                'role' => $notifiable->role?->libelle() ?? 'Utilisateur interne',
+                'url' => $url,
+                'logoUrl' => 'cid:logo-epf-africa@epf-sga',
+                'dureeValidite' => 60,
+            ])
+            ->withSymfonyMessage(function (Email $message): void {
+                $message->addPart(
+                    DataPart::fromPath(
+                        public_path('images/logo-epf-africa.jpg'),
+                        'logo-epf-africa.jpg',
+                        'image/jpeg',
+                    )
+                        ->asInline()
+                        ->setContentId('logo-epf-africa@epf-sga'),
+                );
+            });
     }
 
     /**
