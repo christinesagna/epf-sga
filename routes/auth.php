@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 use App\Http\Controllers\Auth\EmailVerificationPromptController;
+use App\Http\Controllers\Auth\InvitationUtilisateurController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\VerifyEmailController;
@@ -26,6 +27,12 @@ Route::prefix('back-office')->group(function () {
 
         Route::post('reinitialisation', [NewPasswordController::class, 'store'])
             ->name('password.store');
+
+        Route::get('invitation/{token}', [InvitationUtilisateurController::class, 'create'])
+            ->name('invitation.accept');
+
+        Route::post('invitation', [InvitationUtilisateurController::class, 'store'])
+            ->name('invitation.store');
     });
 
     Route::middleware(['auth', 'actif'])->group(function () {

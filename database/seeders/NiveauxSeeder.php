@@ -21,14 +21,12 @@ class NiveauxSeeder extends Seeder
         ];
 
         foreach ($niveaux as $code => $libelle) {
-            DB::table('niveaux')->updateOrInsert(
-                ['code' => $code],
-                [
-                    'libelle' => $libelle,
-                    'created_at' => $now,
-                    'updated_at' => $now,
-                ],
-            );
+            DB::table('niveaux')->insertOrIgnore([
+                'code' => $code,
+                'libelle' => $libelle,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ]);
         }
     }
 }

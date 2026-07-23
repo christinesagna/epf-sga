@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Enums\RoleUtilisateur;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use Illuminate\Http\RedirectResponse;
@@ -27,6 +28,16 @@ class AuthenticatedSessionController extends Controller
         $request->authenticate();
 
         $request->session()->regenerate();
+
+        $request->user()->forceFill([
+            'last_login_at' => now(),
+        ])->save();
+
+        if ($request->user()->role === RoleUtilisateur::SUPER_ADMIN) {
+            $request->session()->forget('url.intended');
+
+            return redirect()->route('administration.dashboard');
+        }
 
         return redirect()->intended(route('back-office.dashboard', absolute: false));
     }
