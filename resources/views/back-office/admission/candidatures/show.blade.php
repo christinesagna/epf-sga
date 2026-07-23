@@ -42,6 +42,12 @@
         </div>
     @endif
 
+    @if (session('warning'))
+        <div class="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-3 text-sm font-semibold text-amber-900" role="status">
+            {{ session('warning') }}
+        </div>
+    @endif
+
     @if ($errors->any())
         <div class="mt-4 rounded-2xl border border-red-200 bg-red-50 px-5 py-3 text-sm text-red-800" role="alert">
             <p class="font-bold">L’action n’a pas pu être réalisée.</p>
@@ -184,6 +190,34 @@
                         <p class="rounded-xl bg-epf-lavender px-5 py-6 text-center text-epf-muted">Aucun document n’a été transmis.</p>
                     @endforelse
                 </div>
+
+                @can('demanderComplement', $candidature)
+                    @if ($typesDocumentsACompleter->isNotEmpty())
+                        <div class="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4">
+                            <p class="font-bold text-amber-950">Demander des documents complémentaires</p>
+                            <p class="mt-1 text-sm text-amber-900">
+                                Documents concernés :
+                                {{ $typesDocumentsACompleter->pluck('libelle')->implode(', ') }}.
+                            </p>
+                            <form method="POST" action="{{ route('admission.candidatures.demande-complement', $candidature) }}" class="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+                                @csrf
+                                <div>
+                                    <label for="motif_complement" class="text-xs font-bold uppercase tracking-wide text-amber-950">
+                                        Message destiné au candidat
+                                    </label>
+                                    <textarea id="motif_complement" name="motif_complement" rows="2" maxlength="2000" required placeholder="Précisez les corrections ou documents attendus." class="mt-1 block w-full rounded-xl border-amber-300 text-sm text-epf-purple shadow-sm focus:border-epf-purple focus:ring-4 focus:ring-purple-100">{{ old('motif_complement') }}</textarea>
+                                </div>
+                                <button type="submit" class="rounded-xl bg-epf-red px-5 py-3 text-sm font-bold text-white hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-100">
+                                    Envoyer la demande
+                                </button>
+                            </form>
+                        </div>
+                    @elseif (! $documentsObligatoiresValides)
+                        <p class="mt-4 rounded-xl bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-900">
+                            Contrôlez les documents en attente avant de demander un complément.
+                        </p>
+                    @endif
+                @endcan
 
                 @can('transmettreAuJury', $candidature)
                     <div class="mt-4 flex flex-col gap-4 rounded-xl border border-purple-100 p-4 sm:flex-row sm:items-center sm:justify-between">

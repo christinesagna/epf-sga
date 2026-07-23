@@ -4,15 +4,18 @@ namespace Tests\Feature\Candidature;
 
 use App\Enums\CandidatureStatut;
 use App\Enums\DocumentStatutValidation;
+use App\Mail\ComplementCandidatureRecuMail;
 use App\Models\Candidat;
 use App\Models\Candidature;
 use App\Models\CandidatureDocument;
 use App\Models\Programme;
+use App\Models\User;
 use Database\Seeders\NiveauxSeeder;
 use Database\Seeders\ProgrammesSeeder;
 use Database\Seeders\TypesDocumentsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Tests\TestCase;
@@ -51,8 +54,13 @@ class CandidatureComplementTest extends TestCase
 
     public function test_un_document_est_remplace_et_le_dossier_repart_vers_l_admission(): void
     {
+        Mail::fake();
+
         $candidature = $this->creerCandidature(CandidatureStatut::COMPLEMENT_ADMISSION);
+        $agent = User::factory()->create();
+        $candidature->update(['agent_admission_id' => $agent->id]);
         $typeDocument = $candidature->programmeNiveau->typesDocuments->first();
+        $autreTypeDocument = $candidature->programmeNiveau->typesDocuments->skip(1)->first();
         $ancienChemin = 'candidature_documents/ancien-document.pdf';
         Storage::disk('local')->put($ancienChemin, 'ancien');
 
@@ -67,6 +75,23 @@ class CandidatureComplementTest extends TestCase
             'statut_validation' => DocumentStatutValidation::REJETE,
             'commentaire_validation' => 'Document illisible.',
         ]);
+        $candidature->historiques()->create([
+            'ancien_statut' => CandidatureStatut::EN_TRAITEMENT_ADMISSION->value,
+            'nouveau_statut' => CandidatureStatut::COMPLEMENT_ADMISSION->value,
+            'acteur_type' => 'admission',
+            'acteur_id' => $agent->id,
+            'commentaire' => 'Le document est illisible.',
+            'metadata' => ['type_document_ids' => [$typeDocument->id]],
+        ]);
+
+        $this->get(route('candidatures.complements.edit', [
+            $candidature,
+            $candidature->edit_token,
+        ]))
+            ->assertOk()
+            ->assertSee($typeDocument->libelle)
+            ->assertDontSee($autreTypeDocument->libelle)
+            ->assertSee('Le document est illisible.');
 
         $response = $this->post(route('candidatures.complements.update', [
             $candidature,
@@ -99,12 +124,29 @@ class CandidatureComplementTest extends TestCase
             'nouveau_statut' => CandidatureStatut::EN_TRAITEMENT_ADMISSION->value,
             'acteur_type' => 'candidat',
         ]);
+        Mail::assertSent(
+            ComplementCandidatureRecuMail::class,
+            fn (ComplementCandidatureRecuMail $mail): bool => $mail->hasTo($agent->email)
+                && $mail->candidature->is($candidature),
+        );
+        $mail = Mail::sent(ComplementCandidatureRecuMail::class)->first();
+        $this->assertStringContainsString(
+            route('admission.candidatures.show', $candidature),
+            $mail->render(),
+        );
     }
 
     public function test_un_complement_jury_retransmet_le_dossier_au_jury(): void
     {
         $candidature = $this->creerCandidature(CandidatureStatut::COMPLEMENT_JURY);
         $typeDocument = $candidature->programmeNiveau->typesDocuments->first();
+        $candidature->historiques()->create([
+            'ancien_statut' => CandidatureStatut::TRANSMISE_AU_JURY->value,
+            'nouveau_statut' => CandidatureStatut::COMPLEMENT_JURY->value,
+            'acteur_type' => 'jury',
+            'commentaire' => 'Document à remplacer.',
+            'metadata' => ['type_document_ids' => [$typeDocument->id]],
+        ]);
 
         $this->post(route('candidatures.complements.update', [
             $candidature,
@@ -125,6 +167,38 @@ class CandidatureComplementTest extends TestCase
             'ancien_statut' => CandidatureStatut::COMPLEMENT_JURY->value,
             'nouveau_statut' => CandidatureStatut::TRANSMISE_AU_JURY->value,
         ]);
+    }
+
+    public function test_tous_les_documents_precisement_demandes_doivent_etre_transmis(): void
+    {
+        $candidature = $this->creerCandidature(CandidatureStatut::COMPLEMENT_ADMISSION);
+        $documentsDemandes = $candidature->programmeNiveau->typesDocuments->take(2)->values();
+        $candidature->historiques()->create([
+            'ancien_statut' => CandidatureStatut::EN_TRAITEMENT_ADMISSION->value,
+            'nouveau_statut' => CandidatureStatut::COMPLEMENT_ADMISSION->value,
+            'acteur_type' => 'admission',
+            'commentaire' => 'Deux documents sont attendus.',
+            'metadata' => [
+                'type_document_ids' => $documentsDemandes->pluck('id')->all(),
+            ],
+        ]);
+
+        $this->post(route('candidatures.complements.update', [
+            $candidature,
+            $candidature->edit_token,
+        ]), [
+            'documents' => [
+                $documentsDemandes[0]->code => UploadedFile::fake()
+                    ->create('premier-document.pdf', 100, 'application/pdf'),
+            ],
+        ])
+            ->assertSessionHasErrors('documents.'.$documentsDemandes[1]->code);
+
+        $this->assertSame(
+            CandidatureStatut::COMPLEMENT_ADMISSION,
+            $candidature->fresh()->statut,
+        );
+        $this->assertDatabaseCount('candidature_documents', 0);
     }
 
     private function creerCandidature(CandidatureStatut $statut): Candidature
