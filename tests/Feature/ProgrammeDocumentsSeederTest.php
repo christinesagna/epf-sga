@@ -156,25 +156,12 @@ class ProgrammeDocumentsSeederTest extends TestCase
         ]);
     }
 
-    public function test_les_seeders_sont_idempotents_et_desactivent_les_masters_segmentes(): void
+    public function test_les_seeders_sont_idempotents_et_ne_creent_que_le_catalogue_commun(): void
     {
         $this->seed(TypesDocumentsSeeder::class);
         $this->seed(NiveauxSeeder::class);
 
         $maintenant = now();
-        $mastersSegmentes = [];
-
-        foreach (['Master 1 Informatique', 'Master 2 Informatique', 'Master 1 Énergie', 'Master 2 Énergie'] as $nom) {
-            $mastersSegmentes[$nom] = DB::table('programmes')->insertGetId([
-                'nom' => $nom,
-                'slug' => str($nom)->slug(),
-                'niveau' => str($nom)->contains('Master 1') ? 'master_1' : 'master_2',
-                'capacite_accueil' => 50,
-                'actif' => true,
-                'created_at' => $maintenant,
-                'updated_at' => $maintenant,
-            ]);
-        }
 
         $this->seed(ProgrammesSeeder::class);
 
@@ -204,17 +191,9 @@ class ProgrammeDocumentsSeederTest extends TestCase
         $this->seed(NiveauxSeeder::class);
         $this->seed(ProgrammesSeeder::class);
 
-        foreach ($mastersSegmentes as $nom => $id) {
-            $this->assertDatabaseHas('programmes', [
-                'id' => $id,
-                'nom' => $nom,
-                'actif' => false,
-            ]);
-        }
-
         $this->assertDatabaseCount('types_documents', 11);
         $this->assertDatabaseCount('niveaux', 7);
-        $this->assertDatabaseCount('programmes', 11);
+        $this->assertDatabaseCount('programmes', 7);
         $this->assertDatabaseCount('programme_niveaux', 15);
         $this->assertDatabaseCount('programme_niveau_type_document', 86);
         $this->assertSame(

@@ -129,52 +129,23 @@
             <h2>Description</h2>
             <p class="programme-description">{{ $category['description'] }}</p>
 
-            @if (isset($category['contenu']['programmes']))
-                @foreach ($category['contenu']['programmes'] as $programme)
-                    @if (is_array($programme))
-                        <div style="margin-top:32px;">
-                            <h2 style="margin-bottom:14px;">{{ $programme['nom'] }}</h2>
-                        </div>
-                    @else
-                        <div style="margin-top:24px;">
-                            <li>{{ $programme }}</li>
-                        </div>
-                    @endif
-                @endforeach
-            @endif
+            @forelse ($programmes as $programme)
+                <article class="programme-panel" style="margin-top:24px;">
+                    <h2>{{ $programme->nom }}</h2>
+                    <p class="programme-description">{{ $programme->description }}</p>
 
-            @if (isset($category['contenu']['details']))
-                <div style="margin-top:24px;">
-                    <strong>Informations clés</strong>
+                    <strong>Niveaux ouverts</strong>
                     <ul>
-                        @foreach ($category['contenu']['details'] as $label => $value)
-                            <li><strong>{{ $label }} :</strong> {{ $value }}</li>
+                        @foreach ($programme->niveaux as $programmeNiveau)
+                            <li>{{ $programmeNiveau->niveau->libelle }}</li>
                         @endforeach
                     </ul>
+                </article>
+            @empty
+                <div class="programme-panel" style="margin-top:24px;">
+                    Aucun programme n’est actuellement ouvert dans cette catégorie.
                 </div>
-            @endif
-
-            @if (isset($category['contenu']['organisation']))
-                <div style="margin-top:32px;">
-                    <strong>Organisation du cycle</strong>
-                    <ul>
-                        @foreach ($category['contenu']['organisation'] as $item)
-                            <li>{{ $item }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
-
-            @if (isset($category['contenu']['specialites']))
-                <div style="margin-top:32px;">
-                    <strong>Spécialités</strong>
-                    <ul>
-                        @foreach ($category['contenu']['specialites'] as $specialite)
-                            <li>{{ $specialite }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
+            @endforelse
 
         </div>
 

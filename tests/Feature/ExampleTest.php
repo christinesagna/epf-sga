@@ -23,6 +23,6 @@ class ExampleTest extends TestCase
         $response = $this->get('/candidatures/create');
 
         $response->assertStatus(200)
-            ->assertSeeText('Candidature en ligne — Étape 1');
+            ->assertSeeText(['Nouvelle candidature', 'Informations personnelles']);
     }
 }

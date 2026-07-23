@@ -175,6 +175,9 @@
     <div class="programme-grid">
         @foreach ($categories as $slug => $category)
             <article class="programme-card">
+                <div class="programme-meta">
+                    {{ $category['nombre_programmes'] }} programme(s) disponible(s)
+                </div>
                 <h2>{{ $category['titre'] }}</h2>
                 <p>{{ $category['description'] }}</p>
                 <div class="programme-actions">

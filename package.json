@@ -1,90 +1,18 @@
 {
-  "$schema": "https://www.schemastore.org/package.json",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "build": "vite build",
-    "dev": "vite",
-    "dev:all": "concurrently -k -n PHP,VITE -c magenta,cyan \"php artisan serve --host=127.0.0.1 --port=8000\" \"vite\"",
-    "watch": "vite build --watch"
-  },
-  "devDependencies": {
-    "@tailwindcss/forms": "^0.5.10",
-    "@tailwindcss/postcss": "^4.3.3",
-    "@tailwindcss/vite": "^4.0.0",
-    "alpinejs": "^3.15.12",
-    "autoprefixer": "^10.5.4",
-    "concurrently": "^9.0.1",
-    "laravel-vite-plugin": "^3.1",
-    "postcss": "^8.5.20",
-    "tailwindcss": "^4.3.3",
-    "vite": "^8.0.0"
-  },
-  "name": "epf-sga",
-  "version": "1.0.0",
-  "description": "<p align=\"center\"><a href=\"https://laravel.com\" target=\"_blank\"><img src=\"https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg\" width=\"400\" alt=\"Laravel Logo\"></a></p>",
-  "main": "tailwind.config.js",
-  "directories": {
-    "test": "tests"
-  },
-  "dependencies": {
-    "ansi-regex": "^5.0.1",
-    "ansi-styles": "^4.3.1",
-    "baseline-browser-mapping": "^2.10.44",
-    "browserslist": "^4.28.6",
-    "caniuse-lite": "^1.0.30001806",
-    "chalk": "^4.1.2",
-    "cliui": "^8.0.1",
-    "color-convert": "^2.0.1",
-    "color-name": "^1.1.4",
-    "detect-libc": "^2.1.2",
-    "electron-to-chromium": "^1.5.393",
-    "emoji-regex": "^8.0.3",
-    "enhanced-resolve": "^5.24.3",
-    "escalade": "^3.2.0",
-    "fdir": "^6.5.0",
-    "fraction.js": "^5.3.4",
-    "get-caller-file": "^2.0.5",
-    "graceful-fs": "^4.2.11",
-    "has-flag": "^4.0.0",
-    "is-fullwidth-code-point": "^3.0.0",
-    "jiti": "^2.7.0",
-    "lightningcss": "^1.32.0",
-    "lightningcss-win32-x64-msvc": "^1.32.0",
-    "magic-string": "^0.30.21",
-    "nanoid": "^3.3.11",
-    "node-releases": "^2.0.36",
-    "picocolors": "^1.1.1",
-    "picomatch": "^4.0.3",
-    "postcss-value-parser": "^4.2.0",
-    "require-directory": "^2.1.1",
-    "rolldown": "^1.1.5",
-    "rxjs": "^7.8.2",
-    "shell-quote": "^1.9.0",
-    "source-map-js": "^1.2.1",
-    "string-width": "^4.2.3",
-    "strip-ansi": "^6.0.1",
-    "supports-color": "^8.1.1",
-    "tapable": "^2.3.3",
-    "tinyglobby": "^0.2.15",
-    "tree-kill": "^1.2.2",
-    "tslib": "^2.8.1",
-    "update-browserslist-db": "^1.2.3",
-    "vite-plugin-full-reload": "^1.2.0",
-    "wrap-ansi": "^7.0.3",
-    "y18n": "^5.0.8",
-    "yargs": "^17.7.2",
-    "yargs-parser": "^21.1.1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/christinesagna/epf-sga.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/christinesagna/epf-sga/issues"
-  },
-  "homepage": "https://github.com/christinesagna/epf-sga#readme"
+    "$schema": "https://www.schemastore.org/package.json",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "build": "vite build",
+        "dev": "vite",
+        "dev:all": "concurrently -k -n PHP,VITE -c magenta,cyan \"php artisan serve --host=127.0.0.1 --port=8000\" \"vite\""
+    },
+    "devDependencies": {
+        "@tailwindcss/forms": "^0.5.10",
+        "@tailwindcss/vite": "^4.0.0",
+        "concurrently": "^9.0.1",
+        "laravel-vite-plugin": "^3.1",
+        "tailwindcss": "^4.0.0",
+        "vite": "^8.0.0"
+    }
 }
