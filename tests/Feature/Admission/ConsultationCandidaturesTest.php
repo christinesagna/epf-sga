@@ -4,6 +4,7 @@ namespace Tests\Feature\Admission;
 
 use App\Enums\CandidatureStatut;
 use App\Enums\DocumentStatutValidation;
+use App\Mail\DemandeComplementCandidatureMail;
 use App\Models\Candidat;
 use App\Models\Candidature;
 use App\Models\CandidatureDocument;
@@ -12,6 +13,7 @@ use App\Models\Programme;
 use App\Models\TypeDocument;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Tests\TestCase;
@@ -320,6 +322,107 @@ class ConsultationCandidaturesTest extends TestCase
             'acteur_type' => 'admission',
             'acteur_id' => $agent->id,
         ]);
+    }
+
+    public function test_l_agent_responsable_demande_un_complement_et_le_candidat_est_prevenu(): void
+    {
+        Mail::fake();
+
+        $agent = User::factory()->create();
+        $candidature = $this->creerCandidature(
+            CandidatureStatut::EN_TRAITEMENT_ADMISSION,
+            'Astou',
+            $agent,
+        );
+        $document = $this->ajouterDocument($candidature);
+        $document->update([
+            'statut_validation' => DocumentStatutValidation::REJETE,
+            'commentaire_validation' => 'Le document est illisible.',
+        ]);
+
+        $this->actingAs(User::factory()->create())
+            ->post(route('admission.candidatures.demande-complement', $candidature), [
+                'motif_complement' => 'Tentative par un autre agent.',
+            ])
+            ->assertForbidden();
+
+        $this->actingAs($agent)
+            ->post(route('admission.candidatures.demande-complement', $candidature), [
+                'motif_complement' => 'Merci de transmettre une copie lisible de votre pièce d’identité.',
+            ])
+            ->assertRedirect()
+            ->assertSessionHas('status');
+
+        $this->assertSame(
+            CandidatureStatut::COMPLEMENT_ADMISSION,
+            $candidature->fresh()->statut,
+        );
+        $this->assertDatabaseHas('candidature_historiques', [
+            'candidature_id' => $candidature->id,
+            'ancien_statut' => CandidatureStatut::EN_TRAITEMENT_ADMISSION->value,
+            'nouveau_statut' => CandidatureStatut::COMPLEMENT_ADMISSION->value,
+            'acteur_type' => 'admission',
+            'acteur_id' => $agent->id,
+            'commentaire' => 'Merci de transmettre une copie lisible de votre pièce d’identité.',
+        ]);
+        $historique = $candidature->historiques()
+            ->where('nouveau_statut', CandidatureStatut::COMPLEMENT_ADMISSION->value)
+            ->latest()
+            ->firstOrFail();
+        $this->assertSame(
+            [$document->type_document_id],
+            $historique->metadata['type_document_ids'],
+        );
+        Mail::assertSent(
+            DemandeComplementCandidatureMail::class,
+            fn (DemandeComplementCandidatureMail $mail): bool => $mail->hasTo($candidature->candidat->email)
+                && $mail->candidature->is($candidature),
+        );
+        $mail = Mail::sent(DemandeComplementCandidatureMail::class)->first();
+        $this->assertStringContainsString(
+            'Merci de transmettre une copie lisible de votre pièce d’identité.',
+            $mail->render(),
+        );
+        $this->assertStringContainsString(
+            route('candidatures.suivi', [$candidature, $candidature->edit_token]),
+            $mail->render(),
+        );
+
+        $this->get(route('candidatures.suivi', [
+            $candidature,
+            $candidature->edit_token,
+        ]))
+            ->assertOk()
+            ->assertSee('Merci de transmettre une copie lisible de votre pièce d’identité.')
+            ->assertSee('Ajouter les documents');
+    }
+
+    public function test_une_demande_de_complement_est_refusee_sans_document_rejete_ou_manquant(): void
+    {
+        Mail::fake();
+
+        $agent = User::factory()->create();
+        $candidature = $this->creerCandidature(
+            CandidatureStatut::EN_TRAITEMENT_ADMISSION,
+            'Adama',
+            $agent,
+        );
+        $document = $this->ajouterDocument($candidature);
+        $document->update([
+            'statut_validation' => DocumentStatutValidation::VALIDE,
+        ]);
+
+        $this->actingAs($agent)
+            ->post(route('admission.candidatures.demande-complement', $candidature), [
+                'motif_complement' => 'Merci de compléter votre dossier.',
+            ])
+            ->assertSessionHasErrors('complement');
+
+        $this->assertSame(
+            CandidatureStatut::EN_TRAITEMENT_ADMISSION,
+            $candidature->fresh()->statut,
+        );
+        Mail::assertNothingSent();
     }
 
     public function test_un_membre_du_jury_ne_peut_pas_realiser_les_actions_de_l_admission(): void

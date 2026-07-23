@@ -13,6 +13,13 @@
                     Déposez uniquement les documents demandés ou corrigés.
                 </p>
 
+                @if ($demandeComplement?->commentaire)
+                    <div style="margin-top:22px; border:1px solid #fed7aa; background:#fff7ed; color:#9a3412; border-radius:14px; padding:16px; line-height:1.7;">
+                        <strong>Message du service d’admission :</strong><br>
+                        {{ $demandeComplement->commentaire }}
+                    </div>
+                @endif
+
                 @if (session('success'))
                     <div style="margin-top:24px; border:1px solid #bbf7d0; background:#f0fdf4; color:#166534; border-radius:14px; padding:16px;">
                         {{ session('success') }}
@@ -58,6 +65,7 @@
                                 <input id="document_{{ $typeDocument->code }}"
                                        name="documents[{{ $typeDocument->code }}]"
                                        type="file"
+                                       required
                                        accept="{{ collect($typeDocument->extensions_autorisees)->map(fn ($extension) => '.'.$extension)->implode(',') }}"
                                        style="display:block; width:100%; margin-top:12px;">
                                 <p style="margin-top:6px; color:#64748b; font-size:.75rem;">

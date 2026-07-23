@@ -96,6 +96,10 @@ Route::prefix('back-office/admission')
             '/candidatures/{candidature}/transmission-jury',
             [AdmissionCandidatureController::class, 'transmettreAuJury'],
         )->name('candidatures.transmission-jury');
+        Route::post(
+            '/candidatures/{candidature}/demande-complement',
+            [AdmissionCandidatureController::class, 'demanderComplement'],
+        )->name('candidatures.demande-complement');
         Route::get(
             '/documents/{document}/ouvrir',
             [AdmissionCandidatureDocumentController::class, 'show'],

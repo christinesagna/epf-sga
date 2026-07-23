@@ -45,4 +45,9 @@ class CandidaturePolicy
     {
         return $this->controlerDocuments($user, $candidature);
     }
+
+    public function demanderComplement(User $user, Candidature $candidature): bool
+    {
+        return $this->controlerDocuments($user, $candidature);
+    }
 }
