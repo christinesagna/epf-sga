@@ -39,6 +39,12 @@ class AuthenticatedSessionController extends Controller
             return redirect()->route('administration.dashboard');
         }
 
+        if ($request->user()->role === RoleUtilisateur::ADMISSION) {
+            $request->session()->forget('url.intended');
+
+            return redirect()->route('admission.dashboard');
+        }
+
         return redirect()->intended(route('back-office.dashboard', absolute: false));
     }
 

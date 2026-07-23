@@ -4,6 +4,7 @@ namespace Tests\Feature\Candidature;
 
 use App\Enums\CandidatureStatut;
 use App\Livewire\Candidature\Formulaire;
+use App\Mail\CandidatureSoumiseMail;
 use App\Models\Candidature;
 use App\Models\Programme;
 use App\Models\ProgrammeNiveau;
@@ -12,6 +13,7 @@ use Database\Seeders\ProgrammesSeeder;
 use Database\Seeders\TypesDocumentsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -73,6 +75,7 @@ class FormulaireCandidatureTest extends TestCase
     {
         Storage::fake('local');
         Storage::fake('public');
+        Mail::fake();
 
         [$programme, $programmeNiveau] = $this->programmeEtNiveau('licence_1');
         $composant = $this->formulaireComplet($programme->id, $programmeNiveau->id);
@@ -100,6 +103,19 @@ class FormulaireCandidatureTest extends TestCase
             Storage::disk('local')->assertExists($document->path);
             Storage::disk('public')->assertMissing($document->path);
         }
+
+        Mail::assertSent(
+            CandidatureSoumiseMail::class,
+            fn (CandidatureSoumiseMail $mail): bool => $mail->hasTo('candidat@gmail.com')
+                && $mail->candidature->is($candidature),
+        );
+
+        $mail = Mail::sent(CandidatureSoumiseMail::class)->first();
+
+        $this->assertStringContainsString(
+            route('candidatures.suivi', [$candidature, $candidature->edit_token]),
+            $mail->render(),
+        );
     }
 
     public function test_un_niveau_d_un_autre_programme_est_refuse(): void

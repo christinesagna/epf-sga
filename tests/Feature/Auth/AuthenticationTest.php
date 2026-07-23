@@ -37,9 +37,12 @@ class AuthenticationTest extends TestCase
         ]);
 
         $this->assertAuthenticated();
-        $response->assertRedirect(route('back-office.dashboard', absolute: false));
+        $response->assertRedirect(route('admission.dashboard', absolute: false));
 
         $this->get('/back-office')
+            ->assertRedirect(route('admission.dashboard'));
+
+        $this->get(route('admission.dashboard'))
             ->assertOk()
             ->assertSee(RoleUtilisateur::ADMISSION->libelle());
     }
@@ -69,7 +72,7 @@ class AuthenticationTest extends TestCase
         $this->post('/back-office/connexion', [
             'email' => $user->email,
             'password' => 'password',
-        ])->assertRedirect(route('back-office.dashboard', absolute: false));
+        ])->assertRedirect(route('admission.dashboard', absolute: false));
 
         $this->get('/back-office')->assertRedirect(route('verification.notice'));
     }

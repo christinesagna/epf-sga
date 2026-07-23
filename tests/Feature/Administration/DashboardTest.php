@@ -126,7 +126,7 @@ class DashboardTest extends TestCase
         $this->post('/back-office/connexion', [
             'email' => $admission->email,
             'password' => 'password',
-        ])->assertRedirect(route('back-office.dashboard', absolute: false));
+        ])->assertRedirect(route('admission.dashboard', absolute: false));
     }
 
     public function test_un_super_administrateur_est_toujours_dirige_vers_le_dashboard_administratif(): void

@@ -4,6 +4,7 @@ namespace App\Livewire\Candidature;
 
 use App\Enums\CandidatureStatut;
 use App\Enums\DocumentStatutValidation;
+use App\Mail\CandidatureSoumiseMail;
 use App\Models\Candidat;
 use App\Models\Candidature;
 use App\Models\CandidatureDocument;
@@ -12,12 +13,14 @@ use App\Models\ProgrammeNiveau;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Livewire\Component;
 use Livewire\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
+use Throwable;
 
 class Formulaire extends Component
 {
@@ -70,6 +73,8 @@ class Formulaire extends Component
     public array $programmeCatalog = [];
 
     public bool $submitted = false;
+
+    public bool $emailSent = false;
 
     protected array $serieProgrammeNiveaux = [
         'S' => ['classe_preparatoire', 'licence', 'cycle_ingenieur', 'master'],
@@ -205,7 +210,7 @@ class Formulaire extends Component
             return;
         }
 
-        DB::transaction(function () use ($validated, $programmeData, $programmeNiveauData): void {
+        $candidature = DB::transaction(function () use ($validated, $programmeData, $programmeNiveauData): Candidature {
             $candidat = Candidat::firstOrNew(['email' => mb_strtolower($validated['email'])]);
             $candidat->fill([
                 'nom' => $validated['nom'],
@@ -260,9 +265,19 @@ class Formulaire extends Component
                     'statut_validation' => DocumentStatutValidation::EN_ATTENTE,
                 ]);
             }
+
+            return $candidature;
         });
 
         $this->submitted = true;
+
+        try {
+            Mail::to($candidature->candidat->email)
+                ->send(new CandidatureSoumiseMail($candidature));
+            $this->emailSent = true;
+        } catch (Throwable $exception) {
+            report($exception);
+        }
     }
 
     public function startNewApplication(): void
@@ -271,7 +286,7 @@ class Formulaire extends Component
             'step', 'nom', 'prenom', 'telephone', 'date_naissance', 'email',
             'lieu_naissance', 'nationalite', 'sexe',
             'pays', 'adresse', 'dernier_diplome', 'serie_baccalaureat',
-            'programme_id', 'programme_niveau_id', 'documents', 'submitted',
+            'programme_id', 'programme_niveau_id', 'documents', 'submitted', 'emailSent',
         ]);
         $this->step = 1;
         $this->resetValidation();

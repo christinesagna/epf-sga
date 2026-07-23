@@ -3,7 +3,9 @@
 namespace App\Providers;
 
 use App\Enums\RoleUtilisateur;
+use App\Models\Candidature;
 use App\Models\User;
+use App\Policies\CandidaturePolicy;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
@@ -22,6 +24,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Gate::policy(Candidature::class, CandidaturePolicy::class);
+
         Gate::define(
             'administrer-back-office',
             fn (User $user): bool => $user->role === RoleUtilisateur::SUPER_ADMIN,

@@ -218,7 +218,7 @@ class GestionUtilisateursTest extends TestCase
         $this->post('/back-office/connexion', [
             'email' => $utilisateur->email,
             'password' => 'password',
-        ])->assertRedirect(route('back-office.dashboard', absolute: false));
+        ])->assertRedirect(route('admission.dashboard', absolute: false));
 
         $this->assertNotNull($utilisateur->fresh()->last_login_at);
     }

@@ -13,6 +13,20 @@ enum CandidatureStatut: string
     case ADMISE = 'admise';
     case REFUSEE = 'refusee';
 
+    public function libelle(): string
+    {
+        return match ($this) {
+            self::BROUILLON => 'Brouillon',
+            self::SOUMISE => 'Soumise',
+            self::EN_TRAITEMENT_ADMISSION => 'En traitement admission',
+            self::COMPLEMENT_ADMISSION => 'Complément demandé par l’admission',
+            self::TRANSMISE_AU_JURY => 'Transmise au jury',
+            self::COMPLEMENT_JURY => 'Complément demandé par le jury',
+            self::ADMISE => 'Admise',
+            self::REFUSEE => 'Refusée',
+        };
+    }
+
     /**
      * @return list<self>
      */
