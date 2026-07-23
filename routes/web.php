@@ -5,7 +5,11 @@ use App\Http\Controllers\BackOffice\Administration\DashboardController as Admini
 use App\Http\Controllers\BackOffice\Administration\ProgrammeController as AdministrationProgrammeController;
 use App\Http\Controllers\BackOffice\Administration\ProgrammeNiveauController;
 use App\Http\Controllers\BackOffice\Administration\UtilisateurController;
+use App\Http\Controllers\BackOffice\Admission\CandidatureController as AdmissionCandidatureController;
+use App\Http\Controllers\BackOffice\Admission\CandidatureDocumentController as AdmissionCandidatureDocumentController;
+use App\Http\Controllers\BackOffice\Admission\DashboardController as AdmissionDashboardController;
 use App\Http\Controllers\CandidatureComplementController;
+use App\Http\Controllers\CandidatureSuiviController;
 use App\Http\Controllers\ProgrammeController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -17,6 +21,9 @@ Route::get('/', function () {
 Route::get('/programmes', [ProgrammeController::class, 'index'])->name('programmes.index');
 Route::get('/programmes/{niveau}', [ProgrammeController::class, 'show'])->name('programmes.show');
 Route::view('/candidatures/create', 'candidatures.create')->name('candidatures.create');
+Route::get('/candidatures/{candidature}/suivi/{token}', CandidatureSuiviController::class)
+    ->middleware('throttle:10,1')
+    ->name('candidatures.suivi');
 Route::get('/candidatures/{candidature}/complements/{token}', [CandidatureComplementController::class, 'edit'])
     ->middleware('throttle:10,1')
     ->name('candidatures.complements.edit');
@@ -30,6 +37,10 @@ Route::get('/candidatures/{candidature}/complements/{token}/confirmation', [Cand
 Route::get('/back-office', function (Request $request) {
     if ($request->user()->role === RoleUtilisateur::SUPER_ADMIN) {
         return redirect()->route('administration.dashboard');
+    }
+
+    if ($request->user()->role === RoleUtilisateur::ADMISSION) {
+        return redirect()->route('admission.dashboard');
     }
 
     return view('back-office.dashboard');
@@ -66,6 +77,33 @@ Route::prefix('back-office/administration')
             ->name('programmes.niveaux.nouveau');
         Route::patch('/programme-niveaux/{programmeNiveau}', [ProgrammeNiveauController::class, 'update'])
             ->name('programme-niveaux.update');
+    });
+
+Route::prefix('back-office/admission')
+    ->name('admission.')
+    ->middleware(['auth', 'verified', 'actif'])
+    ->group(function (): void {
+        Route::get('/', AdmissionDashboardController::class)->name('dashboard');
+        Route::get('/candidatures', [AdmissionCandidatureController::class, 'index'])
+            ->name('candidatures.index');
+        Route::get('/candidatures/{candidature}', [AdmissionCandidatureController::class, 'show'])
+            ->name('candidatures.show');
+        Route::post(
+            '/candidatures/{candidature}/prise-en-charge',
+            [AdmissionCandidatureController::class, 'prendreEnCharge'],
+        )->name('candidatures.prise-en-charge');
+        Route::post(
+            '/candidatures/{candidature}/transmission-jury',
+            [AdmissionCandidatureController::class, 'transmettreAuJury'],
+        )->name('candidatures.transmission-jury');
+        Route::get(
+            '/documents/{document}/ouvrir',
+            [AdmissionCandidatureDocumentController::class, 'show'],
+        )->name('documents.show');
+        Route::patch(
+            '/documents/{document}',
+            [AdmissionCandidatureDocumentController::class, 'update'],
+        )->name('documents.update');
     });
 
 require __DIR__.'/auth.php';

@@ -10,7 +10,13 @@
             </div>
             <h3 style="margin-top:24px; font-size:1.5rem; font-weight:600; color:#0f172a;">Candidature enregistrée avec succès</h3>
             <p style="margin-top:12px; color:#475569; line-height:1.7;">Votre dossier a bien été soumis.</p>
-            <p style="margin-top:8px; font-size:0.875rem; color:#64748b;">Un e-mail vous sera envoyé pour suivre votre candidature.</p>
+            @if ($emailSent)
+                <p style="margin-top:8px; font-size:0.875rem; color:#64748b;">Un e-mail contenant votre lien personnel de suivi vient de vous être envoyé.</p>
+            @else
+                <p style="margin-top:8px; border-radius:12px; background:#fff7ed; padding:12px; font-size:0.875rem; color:#9a3412;">
+                    Votre candidature est enregistrée, mais l’e-mail de suivi n’a pas pu être envoyé. Contactez le service d’admission.
+                </p>
+            @endif
             <div style="margin-top:32px;">
                 <button type="button" wire:click="startNewApplication"
                         style="display:inline-flex; align-items:center; justify-content:center; border-radius:16px; background:#0f172a; color:#fff; padding:12px 24px; font-size:0.875rem; font-weight:600; border:none; cursor:pointer; transition:background 0.2s ease;"
