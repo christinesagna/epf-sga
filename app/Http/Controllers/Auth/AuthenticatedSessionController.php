@@ -29,6 +29,10 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+        $request->user()->forceFill([
+            'last_login_at' => now(),
+        ])->save();
+
         $dashboard = $request->user()->role === RoleUtilisateur::SUPER_ADMIN
             ? 'administration.dashboard'
             : 'back-office.dashboard';

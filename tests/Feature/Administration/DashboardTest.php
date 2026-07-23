@@ -47,6 +47,9 @@ class DashboardTest extends TestCase
         $admin = User::factory()->superAdmin()->create();
         User::factory()->jury()->create();
         User::factory()->unverified()->create();
+        User::factory()->jury()->inactive()->unverified()->create([
+            'invitation_sent_at' => now(),
+        ]);
 
         $programme = Programme::query()->create([
             'nom' => 'Programme de test',
@@ -94,8 +97,10 @@ class DashboardTest extends TestCase
             ->get('/back-office/administration')
             ->assertOk()
             ->assertViewHas('niveauxConfigures', 1)
+            ->assertViewHas('invitationsEnAttente', 1)
             ->assertSee('Indicateurs du back-office')
             ->assertSee('Comptes internes')
+            ->assertSee('Invitations en attente')
             ->assertSee('Programmes actifs')
             ->assertSee('Niveaux configurés')
             ->assertSee('Module en préparation')

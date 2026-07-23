@@ -20,6 +20,17 @@ class BackOfficeModelsTest extends TestCase
             'role',
             'actif',
             'email_verified_at',
+            'invitation_sent_at',
+            'last_login_at',
+        ]));
+
+        $this->assertTrue(Schema::hasColumns('actions_administratives', [
+            'auteur_id',
+            'action',
+            'utilisateur_cible_id',
+            'anciennes_valeurs',
+            'nouvelles_valeurs',
+            'created_at',
         ]));
     }
 
@@ -34,10 +45,15 @@ class BackOfficeModelsTest extends TestCase
 
     public function test_le_role_et_l_etat_actif_sont_castes(): void
     {
-        $jury = User::factory()->jury()->create();
+        $jury = User::factory()->jury()->create([
+            'invitation_sent_at' => now(),
+            'last_login_at' => now(),
+        ]);
 
         $this->assertSame(RoleUtilisateur::JURY, $jury->role);
         $this->assertTrue($jury->actif);
+        $this->assertSame('datetime', $jury->getCasts()['invitation_sent_at']);
+        $this->assertSame('datetime', $jury->getCasts()['last_login_at']);
     }
 
     public function test_la_reorientation_est_reservee_aux_dossiers_transmis_au_jury(): void

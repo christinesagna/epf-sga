@@ -22,7 +22,7 @@
             @foreach ([
                 ['valeur' => $utilisateursInternes, 'libelle' => 'Comptes internes', 'detail' => 'Tous les rôles du back-office', 'couleur' => 'purple'],
                 ['valeur' => $utilisateursActifs, 'libelle' => 'Comptes actifs', 'detail' => 'Connexion actuellement autorisée', 'couleur' => 'red'],
-                ['valeur' => $invitationsEnAttente, 'libelle' => 'Emails à vérifier', 'detail' => 'Comptes internes non vérifiés', 'couleur' => 'purple'],
+                ['valeur' => $invitationsEnAttente, 'libelle' => 'Invitations en attente', 'detail' => 'Comptes invités qui doivent définir leur mot de passe', 'couleur' => 'purple'],
                 ['valeur' => $programmesActifs, 'libelle' => 'Programmes actifs', 'detail' => 'Programmes actuellement disponibles', 'couleur' => 'red'],
                 ['valeur' => $niveauxConfigures, 'libelle' => 'Niveaux configurés', 'detail' => 'Niveaux de formation du catalogue', 'couleur' => 'purple'],
                 ['valeur' => $typesDocumentsActifs, 'libelle' => 'Types de documents', 'detail' => 'Documents actifs configurés', 'couleur' => 'red'],
