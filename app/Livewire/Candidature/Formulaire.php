@@ -240,6 +240,10 @@ class Formulaire extends Component
                 if (! $file) {
                     continue;
                 }
+
+                $originalName = $file->getClientOriginalName();
+                $mimeType = $file->getClientMimeType();
+                $size = $file->getSize();
                 $path = $file->store('candidature_documents', 'local');
                 $type = DB::table('types_documents')->where('code', $code)->first();
                 if (! $type) {
@@ -248,11 +252,11 @@ class Formulaire extends Component
                 CandidatureDocument::create([
                     'candidature_id' => $candidature->id,
                     'type_document_id' => $type->id,
-                    'original_name' => $file->getClientOriginalName(),
+                    'original_name' => $originalName,
                     'stored_name' => basename($path),
                     'path' => $path,
-                    'mime_type' => $file->getClientMimeType(),
-                    'size' => $file->getSize(),
+                    'mime_type' => $mimeType,
+                    'size' => $size,
                     'statut_validation' => DocumentStatutValidation::EN_ATTENTE,
                 ]);
             }
