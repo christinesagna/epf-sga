@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\BackOffice\Administration\DashboardController as AdministrationDashboardController;
+use App\Http\Controllers\BackOffice\Administration\UtilisateurController;
 use App\Http\Controllers\CandidatureComplementController;
 use App\Http\Controllers\ProgrammeController;
 use Illuminate\Support\Facades\Route;
@@ -31,6 +32,14 @@ Route::prefix('back-office/administration')
     ->middleware(['auth', 'verified', 'actif', 'can:administrer-back-office'])
     ->group(function (): void {
         Route::get('/', AdministrationDashboardController::class)->name('dashboard');
+        Route::get('/utilisateurs', [UtilisateurController::class, 'index'])->name('utilisateurs.index');
+        Route::post('/utilisateurs', [UtilisateurController::class, 'store'])->name('utilisateurs.store');
+        Route::post('/utilisateurs/{utilisateur}/invitation', [UtilisateurController::class, 'renvoyerInvitation'])
+            ->name('utilisateurs.invitation.renvoyer');
+        Route::patch('/utilisateurs/{utilisateur}/role', [UtilisateurController::class, 'modifierRole'])
+            ->name('utilisateurs.role');
+        Route::patch('/utilisateurs/{utilisateur}/etat', [UtilisateurController::class, 'modifierEtat'])
+            ->name('utilisateurs.etat');
     });
 
 require __DIR__.'/auth.php';

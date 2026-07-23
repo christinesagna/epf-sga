@@ -19,7 +19,11 @@ class DashboardController extends Controller
         return view('back-office.administration.dashboard', [
             'utilisateursInternes' => User::query()->whereNotNull('role')->count(),
             'utilisateursActifs' => User::query()->whereNotNull('role')->where('actif', true)->count(),
-            'invitationsEnAttente' => User::query()->whereNotNull('role')->whereNull('email_verified_at')->count(),
+            'invitationsEnAttente' => User::query()
+                ->whereNotNull('role')
+                ->whereNotNull('invitation_sent_at')
+                ->whereNull('email_verified_at')
+                ->count(),
             'programmesActifs' => Programme::query()->where('actif', true)->count(),
             'niveauxConfigures' => Niveau::query()->count(),
             'typesDocumentsActifs' => TypeDocument::query()->where('actif', true)->count(),
