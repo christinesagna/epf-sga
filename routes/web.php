@@ -126,6 +126,18 @@ Route::prefix('back-office/jury')
             ->name('candidatures.index');
         Route::get('/candidatures/{candidature}', [JuryCandidatureController::class, 'show'])
             ->name('candidatures.show');
+        Route::post(
+            '/candidatures/{candidature}/demande-complement',
+            [JuryCandidatureController::class, 'demanderComplement'],
+        )->name('candidatures.demande-complement');
+        Route::post(
+            '/candidatures/{candidature}/decision',
+            [JuryCandidatureController::class, 'decider'],
+        )->name('candidatures.decision');
+        Route::post(
+            '/candidatures/{candidature}/reorientation',
+            [JuryCandidatureController::class, 'reorienter'],
+        )->name('candidatures.reorientation');
         Route::get(
             '/documents/{document}/ouvrir',
             [JuryCandidatureDocumentController::class, 'show'],

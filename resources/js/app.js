@@ -26,3 +26,32 @@ document.addEventListener('change', (event) => {
         synchroniserMotifRejet(event.target, true);
     }
 });
+
+const synchroniserMotifDecisionJury = (select, effacerSiMasque = false) => {
+    const formulaire = select.closest('[data-jury-decision-control]');
+    const conteneurMotif = formulaire?.querySelector('[data-jury-decision-reason]');
+    const champMotif = formulaire?.querySelector('[data-jury-decision-input]');
+
+    if (!conteneurMotif || !champMotif) {
+        return;
+    }
+
+    const estRefusee = select.value === 'refusee';
+
+    conteneurMotif.classList.toggle('hidden', !estRefusee);
+    champMotif.required = estRefusee;
+
+    if (!estRefusee && effacerSiMasque) {
+        champMotif.value = '';
+    }
+};
+
+document.querySelectorAll('[data-jury-decision]').forEach((select) => {
+    synchroniserMotifDecisionJury(select);
+});
+
+document.addEventListener('change', (event) => {
+    if (event.target.matches('[data-jury-decision]')) {
+        synchroniserMotifDecisionJury(event.target, true);
+    }
+});

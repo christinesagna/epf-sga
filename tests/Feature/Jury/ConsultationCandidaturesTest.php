@@ -119,7 +119,7 @@ class ConsultationCandidaturesTest extends TestCase
             ->assertSee($transmise->programme->nom)
             ->assertSee($document->typeDocument->libelle)
             ->assertSee('Dossier complet transmis au jury.')
-            ->assertSee('Consultation uniquement');
+            ->assertSee('Rendre la décision');
 
         $this->actingAs($jury)
             ->get(route('jury.candidatures.show', $soumise))
