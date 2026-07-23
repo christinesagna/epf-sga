@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\DocumentStatutValidation;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -17,6 +18,10 @@ class CandidatureDocument extends Model
         'size',
         'statut_validation',
         'commentaire_validation',
+    ];
+
+    protected $casts = [
+        'statut_validation' => DocumentStatutValidation::class,
     ];
 
     public function candidature(): BelongsTo

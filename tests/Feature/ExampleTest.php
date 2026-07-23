@@ -14,6 +14,15 @@ class ExampleTest extends TestCase
     {
         $response = $this->get('/');
 
-        $response->assertStatus(200);
+        $response->assertStatus(200)
+            ->assertSeeText(['EPF Africa', 'Programmes', 'Soumettre une candidature']);
+    }
+
+    public function test_candidature_creation_route_is_available(): void
+    {
+        $response = $this->get('/candidatures/create');
+
+        $response->assertStatus(200)
+            ->assertSeeText(['Nouvelle candidature', 'Informations personnelles']);
     }
 }

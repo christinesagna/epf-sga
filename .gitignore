@@ -18,6 +18,7 @@
 /public/fonts-manifest.dev.json
 /public/hot
 /public/storage
+/public/vendor/livewire
 /storage/*.key
 /storage/pail
 /vendor
@@ -25,3 +26,5 @@ _ide_helper.php
 Homestead.json
 Homestead.yaml
 Thumbs.db
+/tmp_*
+/downloaded_*

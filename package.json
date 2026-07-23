@@ -4,7 +4,8 @@
     "type": "module",
     "scripts": {
         "build": "vite build",
-        "dev": "vite"
+        "dev": "vite",
+        "dev:all": "concurrently -k -n PHP,VITE -c magenta,cyan \"php artisan serve --host=127.0.0.1 --port=8000\" \"vite\""
     },
     "devDependencies": {
         "@tailwindcss/forms": "^0.5.10",
