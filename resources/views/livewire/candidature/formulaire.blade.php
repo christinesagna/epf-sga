@@ -226,6 +226,18 @@
                                 @error('programme_id') <p style="margin-top:8px; font-size:0.875rem; font-weight:500; color:#e11d48;">{{ $message }}</p> @enderror
                             </div>
 
+                            <div>
+                                <label style="display:block; margin-bottom:8px; font-size:0.875rem; font-weight:600; color:#334155;">Niveau demandé <span style="color:#e11d48;">*</span></label>
+                                <select id="programme_niveau_id" wire:model.live="programme_niveau_id" {{ $selectedProgramme ? '' : 'disabled' }}
+                                        style="height:48px; width:100%; border-radius:16px; border:1px solid {{ $errors->has('programme_niveau_id') ? '#fb7185' : '#e2e8f0' }}; background:#fff; padding:0 16px; color:#0f172a; outline:none; appearance:none; {{ $selectedProgramme ? '' : 'cursor:not-allowed; background:#f8fafc;' }}">
+                                    <option value="">{{ $selectedProgramme ? 'Sélectionner un niveau' : "Choisir d'abord une formation" }}</option>
+                                    @foreach (($selectedProgramme['niveaux'] ?? []) as $niveau)
+                                        <option value="{{ $niveau['id'] }}">{{ $niveau['libelle'] }}</option>
+                                    @endforeach
+                                </select>
+                                @error('programme_niveau_id') <p style="margin-top:8px; font-size:0.875rem; font-weight:500; color:#e11d48;">{{ $message }}</p> @enderror
+                            </div>
+
                             @if ($selectedProgramme)
                                 <div style="border-radius:20px; border:1px solid #e2e8f0; background:#ffffff; padding:20px; box-shadow:0 4px 12px rgba(15,23,42,0.04);">
                                     <p style="font-size:0.7rem; text-transform:uppercase; letter-spacing:0.2em; color:#94a3b8;">Formation sélectionnée</p>

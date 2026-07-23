@@ -2,6 +2,7 @@
 
 
 @import 'tailwindcss';
+@plugin '@tailwindcss/forms';
 
 /* ===== Thème (équivalent à `theme.extend` du tailwind.config.js mais en v4) ===== */
 @theme {
