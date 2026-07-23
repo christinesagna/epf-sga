@@ -195,15 +195,20 @@ class ProgrammeDocumentsSeederTest extends TestCase
         $this->assertDatabaseCount('niveaux', 7);
         $this->assertDatabaseCount('programmes', 7);
         $this->assertDatabaseCount('programme_niveaux', 15);
-        $this->assertDatabaseCount('programme_niveau_type_document', 86);
+        $this->assertDatabaseCount('programme_niveau_type_document', 87);
         $this->assertSame(
             $associationIds,
-            DB::table('programme_niveau_type_document')->orderBy('id')->pluck('id')->all(),
+            DB::table('programme_niveau_type_document')
+                ->whereIn('id', $associationIds)
+                ->orderBy('id')
+                ->pluck('id')
+                ->all(),
         );
         $this->assertSame(7, Programme::query()->where('actif', true)->count());
-        $this->assertDatabaseMissing('programme_niveau_type_document', [
+        $this->assertDatabaseHas('programme_niveau_type_document', [
             'programme_niveau_id' => $niveauLicence1,
             'type_document_id' => $cvId,
+            'ordre' => 99,
         ]);
     }
 

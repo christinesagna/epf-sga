@@ -114,22 +114,20 @@ class ProgrammesSeeder extends Seeder
      */
     private function enregistrerProgramme(array $programme, CarbonInterface $now): void
     {
-        DB::table('programmes')->updateOrInsert(
-            ['nom' => $programme['nom']],
-            [
-                'slug' => Str::slug($programme['nom']),
-                'niveau' => $programme['niveau'],
-                'capacite_accueil' => $programme['capacite_accueil'],
-                'date_ouverture' => '2026-01-01',
-                'date_fermeture' => '2026-10-31',
-                'frais_scolarite' => null,
-                'echeancier_paiement' => null,
-                'description' => $programme['description'],
-                'actif' => true,
-                'created_at' => $now,
-                'updated_at' => $now,
-            ],
-        );
+        DB::table('programmes')->insertOrIgnore([
+            'nom' => $programme['nom'],
+            'slug' => Str::slug($programme['nom']),
+            'niveau' => $programme['niveau'],
+            'capacite_accueil' => $programme['capacite_accueil'],
+            'date_ouverture' => '2026-01-01',
+            'date_fermeture' => '2026-10-31',
+            'frais_scolarite' => null,
+            'echeancier_paiement' => null,
+            'description' => $programme['description'],
+            'actif' => true,
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
 
         $programmeId = DB::table('programmes')
             ->where('nom', $programme['nom'])
@@ -143,14 +141,6 @@ class ProgrammesSeeder extends Seeder
         if ($missingNiveauCodes !== []) {
             throw new RuntimeException('Niveaux introuvables : '.implode(', ', $missingNiveauCodes));
         }
-
-        DB::table('programme_niveaux')
-            ->where('programme_id', $programmeId)
-            ->whereNotIn('niveau_id', $niveauIds->values()->all())
-            ->update([
-                'actif' => false,
-                'updated_at' => $now,
-            ]);
 
         foreach ($programme['niveaux'] as $ordreNiveau => $niveau) {
             $this->enregistrerNiveau(
@@ -173,18 +163,14 @@ class ProgrammesSeeder extends Seeder
         int $ordre,
         CarbonInterface $now,
     ): void {
-        DB::table('programme_niveaux')->updateOrInsert(
-            [
-                'programme_id' => $programmeId,
-                'niveau_id' => $niveauId,
-            ],
-            [
-                'ordre' => $ordre,
-                'actif' => true,
-                'created_at' => $now,
-                'updated_at' => $now,
-            ],
-        );
+        DB::table('programme_niveaux')->insertOrIgnore([
+            'programme_id' => $programmeId,
+            'niveau_id' => $niveauId,
+            'ordre' => $ordre,
+            'actif' => true,
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
 
         $programmeNiveauId = DB::table('programme_niveaux')
             ->where('programme_id', $programmeId)
@@ -199,24 +185,15 @@ class ProgrammesSeeder extends Seeder
             throw new RuntimeException('Types de documents introuvables : '.implode(', ', $missingDocumentCodes));
         }
 
-        DB::table('programme_niveau_type_document')
-            ->where('programme_niveau_id', $programmeNiveauId)
-            ->whereNotIn('type_document_id', $typeDocumentIds->values()->all())
-            ->delete();
-
         foreach ($niveau['documents'] as $ordreDocument => $codeDocument) {
-            DB::table('programme_niveau_type_document')->updateOrInsert(
-                [
-                    'programme_niveau_id' => $programmeNiveauId,
-                    'type_document_id' => $typeDocumentIds[$codeDocument],
-                ],
-                [
-                    'obligatoire' => true,
-                    'ordre' => $ordreDocument + 1,
-                    'created_at' => $now,
-                    'updated_at' => $now,
-                ],
-            );
+            DB::table('programme_niveau_type_document')->insertOrIgnore([
+                'programme_niveau_id' => $programmeNiveauId,
+                'type_document_id' => $typeDocumentIds[$codeDocument],
+                'obligatoire' => true,
+                'ordre' => $ordreDocument + 1,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ]);
         }
     }
 }
