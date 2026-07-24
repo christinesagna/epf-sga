@@ -4,8 +4,10 @@ namespace App\Mail;
 
 use App\Enums\CandidatureStatut;
 use App\Models\Candidature;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
@@ -55,5 +57,50 @@ class DecisionCandidatureMail extends Mailable
                 'logoUrl' => 'cid:logo-epf-africa@epf-sga',
             ],
         );
+    }
+
+    /**
+     * @return array<int, Attachment>
+     */
+    public function attachments(): array
+    {
+        if ($this->candidature->statut !== CandidatureStatut::ADMISE) {
+            return [];
+        }
+
+        return [
+            Attachment::fromData(
+                fn (): string => $this->lettreAdmission(),
+                'lettre-admission-'.$this->candidature->id.'.pdf',
+            )->withMime('application/pdf'),
+        ];
+    }
+
+    private function lettreAdmission(): string
+    {
+        $this->candidature->loadMissing([
+            'candidat',
+            'programme',
+            'programmeNiveau.niveau',
+        ]);
+        $decision = $this->candidature->historiques()
+            ->where('nouveau_statut', CandidatureStatut::ADMISE->value)
+            ->latest()
+            ->first();
+        $dateDecision = $decision?->created_at ?? $this->candidature->updated_at;
+        $logo = file_get_contents(public_path('images/logo-epf-africa.jpg'));
+
+        return Pdf::loadView('pdf.lettre-admission', [
+            'candidature' => $this->candidature,
+            'dateDecision' => $dateDecision,
+            'reference' => sprintf(
+                'EPF-%s-%06d',
+                $dateDecision->format('Y'),
+                $this->candidature->id,
+            ),
+            'logoDataUri' => 'data:image/jpeg;base64,'.base64_encode($logo),
+        ])
+            ->setPaper('a4')
+            ->output();
     }
 }

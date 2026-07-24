@@ -43,6 +43,20 @@
                 </div>
             @endif
 
+            @if ($candidature->statut === \App\Enums\CandidatureStatut::ADMISE)
+                <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:18px; margin-top:24px; border:1px solid #bbf7d0; border-radius:20px; background:#f0fdf4; padding:24px;">
+                    <div>
+                        <h2 style="margin:0; color:#166534; font-size:1.2rem;">Votre lettre d’admission est disponible</h2>
+                        <p style="margin:8px 0 0; color:#166534; line-height:1.6;">
+                            Téléchargez et conservez ce document officiel au format PDF.
+                        </p>
+                    </div>
+                    <a href="{{ route('candidatures.lettre-admission', [$candidature, $token]) }}" style="display:inline-flex; border-radius:14px; background:#166534; color:#fff; padding:13px 20px; font-weight:800; text-decoration:none;">
+                        Télécharger ma lettre
+                    </a>
+                </div>
+            @endif
+
             <section style="margin-top:24px; border:1px solid #e6def1; border-radius:24px; background:#fff; padding:28px; box-shadow:0 10px 30px rgba(38,0,82,.06);">
                 <p style="margin:0; color:#e3062f; font-size:.75rem; font-weight:800; letter-spacing:.16em; text-transform:uppercase;">Historique</p>
                 <h2 style="margin:8px 0 0; color:#260052; font-size:1.45rem;">Évolution du dossier</h2>

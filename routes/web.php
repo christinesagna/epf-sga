@@ -13,6 +13,7 @@ use App\Http\Controllers\BackOffice\Jury\CandidatureDocumentController as JuryCa
 use App\Http\Controllers\BackOffice\Jury\DashboardController as JuryDashboardController;
 use App\Http\Controllers\CandidatureComplementController;
 use App\Http\Controllers\CandidatureSuiviController;
+use App\Http\Controllers\LettreAdmissionController;
 use App\Http\Controllers\ProgrammeController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -27,6 +28,12 @@ Route::view('/candidatures/create', 'candidatures.create')->name('candidatures.c
 Route::get('/candidatures/{candidature}/suivi/{token}', CandidatureSuiviController::class)
     ->middleware('throttle:10,1')
     ->name('candidatures.suivi');
+Route::get(
+    '/candidatures/{candidature}/lettre-admission/{token}',
+    LettreAdmissionController::class,
+)
+    ->middleware('throttle:10,1')
+    ->name('candidatures.lettre-admission');
 Route::get('/candidatures/{candidature}/complements/{token}', [CandidatureComplementController::class, 'edit'])
     ->middleware('throttle:10,1')
     ->name('candidatures.complements.edit');
