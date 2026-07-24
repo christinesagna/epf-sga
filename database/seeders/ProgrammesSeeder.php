@@ -163,6 +163,11 @@ class ProgrammesSeeder extends Seeder
         int $ordre,
         CarbonInterface $now,
     ): void {
+        $associationExistante = DB::table('programme_niveaux')
+            ->where('programme_id', $programmeId)
+            ->where('niveau_id', $niveauId)
+            ->exists();
+
         DB::table('programme_niveaux')->insertOrIgnore([
             'programme_id' => $programmeId,
             'niveau_id' => $niveauId,
@@ -176,6 +181,11 @@ class ProgrammesSeeder extends Seeder
             ->where('programme_id', $programmeId)
             ->where('niveau_id', $niveauId)
             ->value('id');
+
+        if ($associationExistante) {
+            return;
+        }
+
         $typeDocumentIds = DB::table('types_documents')
             ->whereIn('code', $niveau['documents'])
             ->pluck('id', 'code');

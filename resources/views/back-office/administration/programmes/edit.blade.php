@@ -54,6 +54,7 @@
                         <th class="px-5 py-4">Niveau</th>
                         <th class="px-5 py-4">Code</th>
                         <th class="px-5 py-4">Ordre et état</th>
+                        <th class="px-5 py-4 text-right">Documents</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-purple-100">
@@ -79,10 +80,15 @@
                                     <button type="submit" class="rounded-xl border border-purple-200 px-4 py-2.5 text-sm font-semibold text-epf-purple focus:outline-none focus:ring-4 focus:ring-purple-100">Enregistrer</button>
                                 </form>
                             </td>
+                            <td class="px-5 py-5 text-right">
+                                <a href="{{ route('administration.programme-niveaux.documents.edit', $programmeNiveau) }}" class="inline-flex rounded-xl bg-epf-purple px-4 py-2.5 text-sm font-semibold text-white focus:outline-none focus:ring-4 focus:ring-purple-200">
+                                    Configurer
+                                </a>
+                            </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="3" class="px-5 py-10 text-center text-epf-muted">Aucun niveau n’est encore associé à ce programme.</td>
+                            <td colspan="4" class="px-5 py-10 text-center text-epf-muted">Aucun niveau n’est encore associé à ce programme.</td>
                         </tr>
                     @endforelse
                 </tbody>
