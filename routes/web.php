@@ -1,9 +1,13 @@
 <?php
 
 use App\Enums\RoleUtilisateur;
+use App\Http\Controllers\BackOffice\Administration\CandidatureController as AdministrationCandidatureController;
+use App\Http\Controllers\BackOffice\Administration\CandidatureDocumentController as AdministrationCandidatureDocumentController;
 use App\Http\Controllers\BackOffice\Administration\DashboardController as AdministrationDashboardController;
 use App\Http\Controllers\BackOffice\Administration\ProgrammeController as AdministrationProgrammeController;
 use App\Http\Controllers\BackOffice\Administration\ProgrammeNiveauController;
+use App\Http\Controllers\BackOffice\Administration\ProgrammeNiveauDocumentController;
+use App\Http\Controllers\BackOffice\Administration\TypeDocumentController;
 use App\Http\Controllers\BackOffice\Administration\UtilisateurController;
 use App\Http\Controllers\BackOffice\Admission\CandidatureController as AdmissionCandidatureController;
 use App\Http\Controllers\BackOffice\Admission\CandidatureDocumentController as AdmissionCandidatureDocumentController;
@@ -91,6 +95,34 @@ Route::prefix('back-office/administration')
             ->name('programmes.niveaux.nouveau');
         Route::patch('/programme-niveaux/{programmeNiveau}', [ProgrammeNiveauController::class, 'update'])
             ->name('programme-niveaux.update');
+        Route::get('/documents', [TypeDocumentController::class, 'index'])
+            ->name('documents.index');
+        Route::get('/documents/creer', [TypeDocumentController::class, 'create'])
+            ->name('documents.create');
+        Route::post('/documents', [TypeDocumentController::class, 'store'])
+            ->name('documents.store');
+        Route::get('/documents/{typeDocument}/modifier', [TypeDocumentController::class, 'edit'])
+            ->name('documents.edit');
+        Route::put('/documents/{typeDocument}', [TypeDocumentController::class, 'update'])
+            ->name('documents.update');
+        Route::patch('/documents/{typeDocument}/etat', [TypeDocumentController::class, 'modifierEtat'])
+            ->name('documents.etat');
+        Route::get(
+            '/programme-niveaux/{programmeNiveau}/documents',
+            [ProgrammeNiveauDocumentController::class, 'edit'],
+        )->name('programme-niveaux.documents.edit');
+        Route::put(
+            '/programme-niveaux/{programmeNiveau}/documents',
+            [ProgrammeNiveauDocumentController::class, 'update'],
+        )->name('programme-niveaux.documents.update');
+        Route::get('/candidatures', [AdministrationCandidatureController::class, 'index'])
+            ->name('candidatures.index');
+        Route::get('/candidatures/{candidature}', [AdministrationCandidatureController::class, 'show'])
+            ->name('candidatures.show');
+        Route::get(
+            '/candidature-documents/{document}/ouvrir',
+            [AdministrationCandidatureDocumentController::class, 'show'],
+        )->name('candidature-documents.show');
     });
 
 Route::prefix('back-office/admission')

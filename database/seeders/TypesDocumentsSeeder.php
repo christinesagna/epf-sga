@@ -70,18 +70,16 @@ class TypesDocumentsSeeder extends Seeder
         ];
 
         foreach ($documents as $document) {
-            DB::table('types_documents')->updateOrInsert(
-                ['code' => $document['code']],
-                [
-                    'libelle' => $document['libelle'],
-                    'description' => $document['description'],
-                    'extensions_autorisees' => json_encode(['pdf', 'jpg', 'jpeg', 'png']),
-                    'taille_max_mb' => 5,
-                    'actif' => true,
-                    'created_at' => $now,
-                    'updated_at' => $now,
-                ]
-            );
+            DB::table('types_documents')->insertOrIgnore([
+                'code' => $document['code'],
+                'libelle' => $document['libelle'],
+                'description' => $document['description'],
+                'extensions_autorisees' => json_encode(['pdf', 'jpg', 'jpeg', 'png']),
+                'taille_max_mb' => 5,
+                'actif' => true,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ]);
         }
     }
 }

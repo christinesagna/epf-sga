@@ -2,7 +2,10 @@
 
 namespace Tests\Feature\Administration;
 
+use App\Enums\CandidatureStatut;
 use App\Enums\RoleUtilisateur;
+use App\Models\Candidat;
+use App\Models\Candidature;
 use App\Models\Niveau;
 use App\Models\Programme;
 use App\Models\ProgrammeNiveau;
@@ -10,6 +13,7 @@ use App\Models\TypeDocument;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class DashboardTest extends TestCase
@@ -42,7 +46,7 @@ class DashboardTest extends TestCase
             ->assertRedirect(route('verification.notice'));
     }
 
-    public function test_un_super_administrateur_accede_aux_indicateurs_sans_consulter_les_candidatures(): void
+    public function test_un_super_administrateur_accede_aux_indicateurs_groupes_du_dashboard(): void
     {
         $admin = User::factory()->superAdmin()->create();
         User::factory()->jury()->create();
@@ -88,6 +92,24 @@ class DashboardTest extends TestCase
             'actif' => true,
         ]);
 
+        $statuts = [
+            CandidatureStatut::BROUILLON,
+            CandidatureStatut::SOUMISE,
+            CandidatureStatut::SOUMISE,
+            CandidatureStatut::EN_TRAITEMENT_ADMISSION,
+            CandidatureStatut::COMPLEMENT_ADMISSION,
+            CandidatureStatut::TRANSMISE_AU_JURY,
+            CandidatureStatut::TRANSMISE_AU_JURY,
+            CandidatureStatut::COMPLEMENT_JURY,
+            CandidatureStatut::ADMISE,
+            CandidatureStatut::ADMISE,
+            CandidatureStatut::REFUSEE,
+        ];
+
+        foreach ($statuts as $index => $statut) {
+            $this->creerCandidature($programme, $statut, $index);
+        }
+
         $queries = [];
         DB::listen(function ($query) use (&$queries): void {
             $queries[] = mb_strtolower($query->sql);
@@ -98,17 +120,60 @@ class DashboardTest extends TestCase
             ->assertOk()
             ->assertViewHas('niveauxConfigures', 1)
             ->assertViewHas('invitationsEnAttente', 1)
-            ->assertSee('Indicateurs du back-office')
+            ->assertViewHas('indicateursCandidatures', [
+                'total' => 10,
+                'nouvelles' => 2,
+                'admission' => 1,
+                'complements' => 2,
+                'complements_admission' => 1,
+                'complements_jury' => 1,
+                'jury' => 2,
+                'decisions' => 3,
+                'admises' => 2,
+                'refusees' => 1,
+            ])
+            ->assertSee('Suivi des candidatures')
+            ->assertSee('Configuration du back-office')
             ->assertSee('Comptes internes')
             ->assertSee('Invitations en attente')
             ->assertSee('Programmes actifs')
             ->assertSee('Niveaux configurés')
-            ->assertSee('Module en préparation')
-            ->assertSee('Aucun dossier n’est consulté');
+            ->assertSee('Admission : 1 · Jury : 1')
+            ->assertSee('Admises : 2 · Refusées : 1')
+            ->assertSee('Gérer les utilisateurs')
+            ->assertSee('Gérer les programmes')
+            ->assertDontSee('Module en préparation')
+            ->assertDontSee('La gestion des comptes internes permettra');
 
-        $this->assertFalse(
-            collect($queries)->contains(fn (string $query): bool => str_contains($query, 'candidatures')),
+        $this->assertCount(
+            1,
+            collect($queries)->filter(
+                fn (string $query): bool => str_contains($query, 'from `candidatures`'),
+            ),
         );
+    }
+
+    public function test_le_dashboard_affiche_des_indicateurs_a_zero_sans_candidature(): void
+    {
+        $admin = User::factory()->superAdmin()->create();
+
+        $this->actingAs($admin)
+            ->get(route('administration.dashboard'))
+            ->assertOk()
+            ->assertViewHas('indicateursCandidatures', [
+                'total' => 0,
+                'nouvelles' => 0,
+                'admission' => 0,
+                'complements' => 0,
+                'complements_admission' => 0,
+                'complements_jury' => 0,
+                'jury' => 0,
+                'decisions' => 0,
+                'admises' => 0,
+                'refusees' => 0,
+            ])
+            ->assertSee('Dossiers soumis')
+            ->assertSee('Les brouillons ne sont pas comptabilisés');
     }
 
     public function test_la_connexion_redirige_chaque_role_vers_son_accueil(): void
@@ -146,6 +211,26 @@ class DashboardTest extends TestCase
 
         $this->get('/back-office/administration')
             ->assertOk()
-            ->assertSee('Indicateurs du back-office');
+            ->assertSee('Suivi des candidatures');
+    }
+
+    private function creerCandidature(
+        Programme $programme,
+        CandidatureStatut $statut,
+        int $index,
+    ): Candidature {
+        $candidat = Candidat::query()->create([
+            'nom' => "Candidat {$index}",
+            'prenom' => 'Test',
+            'email' => "candidat-{$index}@example.com",
+        ]);
+
+        return Candidature::query()->create([
+            'candidat_id' => $candidat->id,
+            'programme_id' => $programme->id,
+            'edit_token' => (string) Str::uuid(),
+            'statut' => $statut,
+            'submitted_at' => $statut === CandidatureStatut::BROUILLON ? null : now(),
+        ]);
     }
 }

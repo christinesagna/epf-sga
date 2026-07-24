@@ -432,6 +432,7 @@ class Formulaire extends Component
         $rows = DB::table('programme_niveau_type_document as p')
             ->join('types_documents as t', 'p.type_document_id', '=', 't.id')
             ->where('p.programme_niveau_id', $niveau['id'])
+            ->where('t.actif', true)
             ->orderBy('p.ordre')
             ->get(['t.id', 't.code', 't.libelle', 't.extensions_autorisees', 't.taille_max_mb', 'p.obligatoire']);
 

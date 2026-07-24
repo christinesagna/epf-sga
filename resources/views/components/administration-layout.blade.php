@@ -39,25 +39,32 @@
                         Utilisateurs
                     </a>
 
-                    <a href="{{ route('administration.programmes.index') }}" @if (request()->routeIs('administration.programmes.*') || request()->routeIs('administration.programme-niveaux.*')) aria-current="page" @endif @class([
+                    <a href="{{ route('administration.programmes.index') }}" @if (request()->routeIs('administration.programmes.*') || request()->routeIs('administration.programme-niveaux.update')) aria-current="page" @endif @class([
                         'flex items-center gap-3 rounded-xl px-4 py-3 font-semibold focus:outline-none focus:ring-4 focus:ring-white/20',
-                        'bg-white text-epf-purple shadow-sm' => request()->routeIs('administration.programmes.*') || request()->routeIs('administration.programme-niveaux.*'),
-                        'text-purple-100 hover:bg-white/10' => ! request()->routeIs('administration.programmes.*') && ! request()->routeIs('administration.programme-niveaux.*'),
+                        'bg-white text-epf-purple shadow-sm' => request()->routeIs('administration.programmes.*') || request()->routeIs('administration.programme-niveaux.update'),
+                        'text-purple-100 hover:bg-white/10' => ! request()->routeIs('administration.programmes.*') && ! request()->routeIs('administration.programme-niveaux.update'),
                     ])>
                         <span class="flex size-8 items-center justify-center rounded-lg bg-white/10 text-xs font-bold">PR</span>
                         Programmes
                     </a>
 
-                    @foreach ([
-                        ['code' => 'DO', 'libelle' => 'Documents'],
-                        ['code' => 'CA', 'libelle' => 'Candidatures'],
-                    ] as $module)
-                        <span class="flex cursor-not-allowed items-center gap-3 rounded-xl px-4 py-3 text-purple-100" aria-disabled="true">
-                            <span class="flex size-8 items-center justify-center rounded-lg bg-white/10 text-xs font-bold">{{ $module['code'] }}</span>
-                            <span class="flex-1">{{ $module['libelle'] }}</span>
-                            <span class="rounded-full bg-white/10 px-2 py-1 text-[0.65rem] font-bold uppercase tracking-wide">Bientôt</span>
-                        </span>
-                    @endforeach
+                    <a href="{{ route('administration.documents.index') }}" @if (request()->routeIs('administration.documents.*') || request()->routeIs('administration.programme-niveaux.documents.*')) aria-current="page" @endif @class([
+                        'flex items-center gap-3 rounded-xl px-4 py-3 font-semibold focus:outline-none focus:ring-4 focus:ring-white/20',
+                        'bg-white text-epf-purple shadow-sm' => request()->routeIs('administration.documents.*') || request()->routeIs('administration.programme-niveaux.documents.*'),
+                        'text-purple-100 hover:bg-white/10' => ! request()->routeIs('administration.documents.*') && ! request()->routeIs('administration.programme-niveaux.documents.*'),
+                    ])>
+                        <span class="flex size-8 items-center justify-center rounded-lg bg-white/10 text-xs font-bold">DO</span>
+                        Documents
+                    </a>
+
+                    <a href="{{ route('administration.candidatures.index') }}" @if (request()->routeIs('administration.candidatures.*') || request()->routeIs('administration.candidature-documents.*')) aria-current="page" @endif @class([
+                        'flex items-center gap-3 rounded-xl px-4 py-3 font-semibold focus:outline-none focus:ring-4 focus:ring-white/20',
+                        'bg-white text-epf-purple shadow-sm' => request()->routeIs('administration.candidatures.*') || request()->routeIs('administration.candidature-documents.*'),
+                        'text-purple-100 hover:bg-white/10' => ! request()->routeIs('administration.candidatures.*') && ! request()->routeIs('administration.candidature-documents.*'),
+                    ])>
+                        <span class="flex size-8 items-center justify-center rounded-lg bg-white/10 text-xs font-bold">CA</span>
+                        Candidatures
+                    </a>
                 </nav>
 
                 <div class="border-t border-white/10 px-6 py-5 text-sm">
@@ -107,15 +114,19 @@
                             ])>Utilisateurs</a>
                             <a href="{{ route('administration.programmes.index') }}" @class([
                                 'rounded-xl px-4 py-3 font-semibold',
-                                'bg-epf-purple text-white' => request()->routeIs('administration.programmes.*') || request()->routeIs('administration.programme-niveaux.*'),
-                                'border border-purple-100 bg-white text-epf-purple' => ! request()->routeIs('administration.programmes.*') && ! request()->routeIs('administration.programme-niveaux.*'),
+                                'bg-epf-purple text-white' => request()->routeIs('administration.programmes.*') || request()->routeIs('administration.programme-niveaux.update'),
+                                'border border-purple-100 bg-white text-epf-purple' => ! request()->routeIs('administration.programmes.*') && ! request()->routeIs('administration.programme-niveaux.update'),
                             ])>Programmes</a>
-                            @foreach (['Documents', 'Candidatures'] as $module)
-                                <span class="flex cursor-not-allowed items-center justify-between rounded-xl border border-purple-100 bg-white px-4 py-3 text-sm text-epf-muted" aria-disabled="true">
-                                    {{ $module }}
-                                    <span class="text-xs font-bold uppercase">Bientôt</span>
-                                </span>
-                            @endforeach
+                            <a href="{{ route('administration.documents.index') }}" @class([
+                                'rounded-xl px-4 py-3 font-semibold',
+                                'bg-epf-purple text-white' => request()->routeIs('administration.documents.*') || request()->routeIs('administration.programme-niveaux.documents.*'),
+                                'border border-purple-100 bg-white text-epf-purple' => ! request()->routeIs('administration.documents.*') && ! request()->routeIs('administration.programme-niveaux.documents.*'),
+                            ])>Documents</a>
+                            <a href="{{ route('administration.candidatures.index') }}" @class([
+                                'rounded-xl px-4 py-3 font-semibold',
+                                'bg-epf-purple text-white' => request()->routeIs('administration.candidatures.*') || request()->routeIs('administration.candidature-documents.*'),
+                                'border border-purple-100 bg-white text-epf-purple' => ! request()->routeIs('administration.candidatures.*') && ! request()->routeIs('administration.candidature-documents.*'),
+                            ])>Candidatures</a>
                         </nav>
                     </details>
                 </header>
