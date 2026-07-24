@@ -18,6 +18,7 @@ class CandidatureSuiviController extends Controller
         $candidature->load([
             'candidat',
             'programme',
+            'programmeOrigine',
             'programmeNiveau.niveau',
             'historiques' => fn ($query) => $query->latest(),
         ]);
@@ -25,6 +26,8 @@ class CandidatureSuiviController extends Controller
         return view('candidatures.suivi', [
             'candidature' => $candidature,
             'token' => $token,
+            'estReorientee' => $candidature->programme_origine_id !== null
+                && $candidature->statut === CandidatureStatut::TRANSMISE_AU_JURY,
             'complementAttendu' => in_array($candidature->statut, [
                 CandidatureStatut::COMPLEMENT_ADMISSION,
                 CandidatureStatut::COMPLEMENT_JURY,

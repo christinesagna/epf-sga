@@ -117,9 +117,20 @@ class CandidatureController extends Controller
             'documents.typeDocument',
             'historiques' => fn ($query) => $query->latest(),
         ]);
+        $programmeIdsHistorique = $candidature->historiques
+            ->filter(fn ($historique): bool => ($historique->metadata['action'] ?? null) === 'reorientation')
+            ->flatMap(fn ($historique): array => [
+                $historique->metadata['ancien_programme_id'] ?? null,
+                $historique->metadata['nouveau_programme_id'] ?? null,
+            ])
+            ->filter()
+            ->unique();
 
         return view('back-office.jury.candidatures.show', [
             'candidature' => $candidature,
+            'programmesHistorique' => Programme::query()
+                ->whereKey($programmeIdsHistorique)
+                ->pluck('nom', 'id'),
             'typesDocuments' => $candidature->programmeNiveau?->typesDocuments()
                 ->where('types_documents.actif', true)
                 ->get()

@@ -34,6 +34,7 @@ class SuiviCandidatureTest extends TestCase
             ->assertSee($candidature->programme->nom)
             ->assertSee('Soumise')
             ->assertSee('Candidature soumise.')
+            ->assertDontSee('Votre candidature a été réorientée')
             ->assertDontSee($candidature->candidat->email);
     }
 
@@ -61,6 +62,62 @@ class SuiviCandidatureTest extends TestCase
                 $candidature,
                 $candidature->edit_token,
             ]), false);
+    }
+
+    public function test_le_suivi_explique_clairement_la_reorientation_du_dossier(): void
+    {
+        $candidature = $this->creerCandidature(CandidatureStatut::TRANSMISE_AU_JURY);
+        $programmeOrigine = $candidature->programme;
+        $nouveauProgramme = Programme::query()->create([
+            'nom' => 'Cycle ingénieur',
+            'slug' => 'cycle-ingenieur',
+            'niveau' => 'ingenieur',
+            'capacite_accueil' => 30,
+            'actif' => true,
+        ]);
+        $nouveauNiveau = Niveau::query()->create([
+            'code' => 'ingenieur_1',
+            'libelle' => 'Ingénieur 1',
+        ]);
+        $nouveauProgrammeNiveau = $nouveauProgramme->niveaux()->create([
+            'niveau_id' => $nouveauNiveau->id,
+            'ordre' => 1,
+            'actif' => true,
+        ]);
+
+        $candidature->update([
+            'programme_origine_id' => $programmeOrigine->id,
+            'programme_id' => $nouveauProgramme->id,
+            'programme_niveau_id' => $nouveauProgrammeNiveau->id,
+        ]);
+        $candidature->historiques()->create([
+            'ancien_statut' => CandidatureStatut::TRANSMISE_AU_JURY->value,
+            'nouveau_statut' => CandidatureStatut::TRANSMISE_AU_JURY->value,
+            'acteur_type' => 'jury',
+            'acteur_id' => 3,
+            'commentaire' => 'Ce programme correspond mieux à votre parcours.',
+            'metadata' => [
+                'action' => 'reorientation',
+                'ancien_programme_id' => $programmeOrigine->id,
+                'nouveau_programme_id' => $nouveauProgramme->id,
+            ],
+        ]);
+
+        $this->get(route('candidatures.suivi', [
+            $candidature,
+            $candidature->edit_token,
+        ]))
+            ->assertOk()
+            ->assertSee('Votre candidature a été réorientée')
+            ->assertSee($programmeOrigine->nom)
+            ->assertSee($nouveauProgramme->nom)
+            ->assertSee('Décision actuelle')
+            ->assertSee('Réorientation')
+            ->assertSee('Décision enregistrée le')
+            ->assertSee('Réorientation du dossier')
+            ->assertSee('Ce programme correspond mieux à votre parcours.')
+            ->assertSee('Le jury a rendu sa décision d’orientation.')
+            ->assertDontSee('Votre dossier reste transmis au jury');
     }
 
     private function creerCandidature(

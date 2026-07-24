@@ -110,9 +110,22 @@
                     @forelse ($candidature->historiques as $historique)
                         <article class="rounded-xl border border-purple-100 bg-epf-lavender p-4">
                             <div class="flex flex-wrap justify-between gap-2">
-                                <p class="font-bold">{{ \App\Enums\CandidatureStatut::tryFrom($historique->nouveau_statut)?->libelle() ?? $historique->nouveau_statut }}</p>
+                                <p class="font-bold">
+                                    @if (($historique->metadata['action'] ?? null) === 'reorientation')
+                                        Réorientation du dossier
+                                    @else
+                                        {{ \App\Enums\CandidatureStatut::tryFrom($historique->nouveau_statut)?->libelle() ?? $historique->nouveau_statut }}
+                                    @endif
+                                </p>
                                 <time class="text-xs text-epf-muted">{{ $historique->created_at->format('d/m/Y H:i') }}</time>
                             </div>
+                            @if (($historique->metadata['action'] ?? null) === 'reorientation')
+                                <p class="mt-2 text-sm font-semibold text-epf-purple">
+                                    {{ $programmesHistorique->get($historique->metadata['ancien_programme_id'] ?? null, 'Programme précédent') }}
+                                    <span aria-hidden="true">→</span>
+                                    {{ $programmesHistorique->get($historique->metadata['nouveau_programme_id'] ?? null, 'Nouveau programme') }}
+                                </p>
+                            @endif
                             @if ($historique->commentaire)
                                 <p class="mt-2 text-sm text-epf-muted">{{ $historique->commentaire }}</p>
                             @endif

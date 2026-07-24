@@ -197,6 +197,14 @@ class TraitementCandidaturesTest extends TestCase
                 ->hasTo($candidature->candidat->email)
                 && $mail->ancienProgramme->is($programmeInitial),
         );
+
+        $this->actingAs($jury)
+            ->get(route('jury.candidatures.show', $candidature))
+            ->assertOk()
+            ->assertSee('Réorientation du dossier')
+            ->assertSee($programmeInitial->nom)
+            ->assertSee($nouveauNiveau->programme->nom)
+            ->assertSee('Ce programme correspond mieux à votre parcours.');
     }
 
     public function test_l_admission_ne_peut_pas_utiliser_les_actions_du_jury(): void
