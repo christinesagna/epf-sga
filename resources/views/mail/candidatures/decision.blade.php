@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Complément de candidature demandé</title>
+        <title>Décision concernant votre candidature</title>
     </head>
     <body style="margin:0; padding:0; background:#f6f3fb; color:#260052; font-family:Arial,Helvetica,sans-serif;">
         <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%; background:#f6f3fb;">
@@ -18,29 +18,31 @@
                         </tr>
                         <tr>
                             <td style="overflow:hidden; border-radius:24px; background:#fff; box-shadow:0 16px 45px rgba(38,0,82,.12);">
-                                <div style="height:8px; background:#e3062f;"></div>
+                                <div style="height:8px; background:{{ $candidature->statut === \App\Enums\CandidatureStatut::ADMISE ? '#16803c' : '#e3062f' }};"></div>
                                 <div style="padding:40px 44px;">
-                                    <p style="margin:0; color:#e3062f; font-size:12px; font-weight:700; letter-spacing:2px; text-transform:uppercase;">Action attendue</p>
-                                    <h1 style="margin:12px 0 0; font-size:28px; line-height:1.3;">Votre dossier doit être complété</h1>
+                                    <p style="margin:0; color:#e3062f; font-size:12px; font-weight:700; letter-spacing:2px; text-transform:uppercase;">Décision du jury</p>
+                                    <h1 style="margin:12px 0 0; font-size:28px; line-height:1.3;">
+                                        {{ $candidature->statut === \App\Enums\CandidatureStatut::ADMISE
+                                            ? 'Félicitations, votre candidature est admise'
+                                            : 'Votre candidature n’a pas été retenue' }}
+                                    </h1>
                                     <p style="margin:20px 0 0; color:#4f4663; font-size:16px; line-height:1.7;">
-                                        Bonjour {{ $candidature->candidat->prenom }}, {{ $origine === 'jury' ? 'le jury' : 'le service d’admission' }} a examiné votre candidature pour
-                                        <strong>{{ $candidature->programme?->nom ?? 'le programme sélectionné' }}</strong>.
+                                        Bonjour {{ $candidature->candidat->prenom }}, le jury a rendu sa décision pour votre candidature au programme
+                                        <strong>{{ $candidature->programme?->nom ?? 'sélectionné' }}</strong>.
                                     </p>
 
-                                    <div style="margin-top:24px; border-radius:14px; background:#fff5f6; padding:18px; color:#8a1730; line-height:1.7;">
-                                        <strong>Demande {{ $origine === 'jury' ? 'du jury' : 'du service d’admission' }} :</strong><br>
-                                        {{ $motif }}
-                                    </div>
+                                    @if ($motif)
+                                        <div style="margin-top:24px; border-radius:14px; background:#f6f3fb; padding:18px; color:#4f4663; line-height:1.7;">
+                                            <strong>Précision du jury :</strong><br>
+                                            {{ $motif }}
+                                        </div>
+                                    @endif
 
                                     <div style="margin-top:30px; text-align:center;">
                                         <a href="{{ $urlSuivi }}" style="display:inline-block; border-radius:12px; background:#e3062f; color:#fff; padding:15px 26px; font-size:15px; font-weight:700; text-decoration:none;">
-                                            Consulter et compléter mon dossier
+                                            Consulter le suivi de ma candidature
                                         </a>
                                     </div>
-
-                                    <p style="margin:26px 0 0; color:#706784; font-size:13px; line-height:1.7;">
-                                        Utilisez uniquement votre lien personnel de suivi et ne le transférez pas.
-                                    </p>
                                 </div>
                             </td>
                         </tr>

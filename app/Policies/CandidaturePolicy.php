@@ -27,6 +27,42 @@ class CandidaturePolicy
             && $candidature->statut !== CandidatureStatut::BROUILLON;
     }
 
+    public function viewAnyJury(User $user): bool
+    {
+        return $user->role === RoleUtilisateur::JURY;
+    }
+
+    public function viewJury(User $user, Candidature $candidature): bool
+    {
+        return $this->viewAnyJury($user)
+            && in_array(
+                $candidature->statut,
+                CandidatureStatut::visiblesParJury(),
+                true,
+            );
+    }
+
+    public function traiterJury(User $user, Candidature $candidature): bool
+    {
+        return $this->viewAnyJury($user)
+            && $candidature->statut === CandidatureStatut::TRANSMISE_AU_JURY;
+    }
+
+    public function demanderComplementJury(User $user, Candidature $candidature): bool
+    {
+        return $this->traiterJury($user, $candidature);
+    }
+
+    public function deciderJury(User $user, Candidature $candidature): bool
+    {
+        return $this->traiterJury($user, $candidature);
+    }
+
+    public function reorienterJury(User $user, Candidature $candidature): bool
+    {
+        return $this->traiterJury($user, $candidature);
+    }
+
     public function prendreEnCharge(User $user, Candidature $candidature): bool
     {
         return $user->role === RoleUtilisateur::ADMISSION

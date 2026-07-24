@@ -261,8 +261,19 @@
                     <article class="flex flex-col gap-2 rounded-xl border border-purple-100 bg-epf-lavender p-4 sm:flex-row sm:items-start sm:justify-between">
                         <div>
                             <p class="font-bold">
-                                {{ \App\Enums\CandidatureStatut::tryFrom($historique->nouveau_statut)?->libelle() ?? $historique->nouveau_statut }}
+                                @if (($historique->metadata['action'] ?? null) === 'reorientation')
+                                    Réorientation du dossier
+                                @else
+                                    {{ \App\Enums\CandidatureStatut::tryFrom($historique->nouveau_statut)?->libelle() ?? $historique->nouveau_statut }}
+                                @endif
                             </p>
+                            @if (($historique->metadata['action'] ?? null) === 'reorientation')
+                                <p class="mt-1 text-sm font-semibold text-epf-purple">
+                                    {{ $programmesHistorique->get($historique->metadata['ancien_programme_id'] ?? null, 'Programme précédent') }}
+                                    <span aria-hidden="true">→</span>
+                                    {{ $programmesHistorique->get($historique->metadata['nouveau_programme_id'] ?? null, 'Nouveau programme') }}
+                                </p>
+                            @endif
                             @if ($historique->commentaire)
                                 <p class="mt-1 text-sm text-epf-muted">{{ $historique->commentaire }}</p>
                             @endif

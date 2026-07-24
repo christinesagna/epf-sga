@@ -121,6 +121,14 @@ class CandidatureController extends Controller
             'historiques' => fn ($query) => $query->latest(),
             'programmeNiveau.typesDocuments',
         ]);
+        $programmeIdsHistorique = $candidature->historiques
+            ->filter(fn ($historique): bool => ($historique->metadata['action'] ?? null) === 'reorientation')
+            ->flatMap(fn ($historique): array => [
+                $historique->metadata['ancien_programme_id'] ?? null,
+                $historique->metadata['nouveau_programme_id'] ?? null,
+            ])
+            ->filter()
+            ->unique();
 
         $documentsObligatoires = $candidature->programmeNiveau?->typesDocuments
             ->filter(fn ($typeDocument): bool => $typeDocument->actif
@@ -139,6 +147,9 @@ class CandidatureController extends Controller
             'documentsObligatoires' => $documentsObligatoires,
             'documentsObligatoiresValides' => $documentsObligatoiresValides,
             'typesDocumentsACompleter' => $typesDocumentsACompleter,
+            'programmesHistorique' => Programme::query()
+                ->whereKey($programmeIdsHistorique)
+                ->pluck('nom', 'id'),
         ]);
     }
 

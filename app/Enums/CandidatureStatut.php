@@ -54,4 +54,30 @@ enum CandidatureStatut: string
     {
         return in_array($nouveauStatut, $this->transitionsAutorisees(), true);
     }
+
+    /**
+     * Statuts des dossiers qui ont atteint l'étape du jury.
+     *
+     * @return list<self>
+     */
+    public static function visiblesParJury(): array
+    {
+        return [
+            self::TRANSMISE_AU_JURY,
+            self::COMPLEMENT_JURY,
+            self::ADMISE,
+            self::REFUSEE,
+        ];
+    }
+
+    /**
+     * @return list<string>
+     */
+    public static function valeursVisiblesParJury(): array
+    {
+        return array_map(
+            fn (self $statut): string => $statut->value,
+            self::visiblesParJury(),
+        );
+    }
 }
